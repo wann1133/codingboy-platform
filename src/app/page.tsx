@@ -137,7 +137,7 @@ export default function Home() {
                 <a href="#beranda" className="text-white hover:text-blue-400 px-3 py-2 rounded-md text-sm font-medium transition-colors">
                   Beranda
                 </a>
-                <a href="#tentang" className="text-gray-300 hover:text-blue-400 px-3 py-2 rounded-md text-sm font-medium transition-colors">
+                <a href="tentang" className="text-gray-300 hover:text-blue-400 px-3 py-2 rounded-md text-sm font-medium transition-colors">
                   Tentang
                 </a>
                 <a href="#portfolio" className="text-gray-300 hover:text-blue-400 px-3 py-2 rounded-md text-sm font-medium transition-colors">
@@ -527,7 +527,7 @@ export default function Home() {
                 WhatsApp Kami Sekarang
               </a>
               <a
-                href="#kontak"
+                href="kontak"
                 className="bg-white/10 backdrop-blur-md border border-white/20 text-white hover:bg-white/20 px-8 py-4 rounded-lg text-lg font-medium transition-all"
               >
                 Konsultasi Detail
