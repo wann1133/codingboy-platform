@@ -6,8 +6,8 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider = "sqlite"
+  url      = "file:./dev.db"
 }
 
 model User {
@@ -35,7 +35,7 @@ model Service {
   description String
   price       Int
   duration    String
-  features    String[] // JSON array of features
+  features    String // JSON string of features (SQLite doesn't support arrays)
   popular     Boolean  @default(false)
   active      Boolean  @default(true)
   createdAt   DateTime @default(now())
@@ -81,7 +81,7 @@ model Portfolio {
   category    String
   image       String?
   url         String?
-  features    String[] // JSON array of features
+  features    String // JSON string of features (SQLite doesn't support arrays)
   duration    String
   client      String?
   testimonial String?
@@ -123,7 +123,7 @@ model BlogPost {
   content     String
   image       String?
   category    String
-  tags        String[] // JSON array of tags
+  tags        String // JSON string of tags (SQLite doesn't support arrays)
   published   Boolean  @default(false)
   featured    Boolean  @default(false)
   views       Int      @default(0)
