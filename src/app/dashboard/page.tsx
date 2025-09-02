@@ -278,7 +278,7 @@ export default function Dashboard() {
                 Tim support kami siap membantu Anda 24/7
               </p>
               <a
-                href="https://wa.me/6281234567890"
+                href="https://wa.me/62881025741054"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-full bg-green-600 hover:bg-green-700 text-white p-3 rounded-lg text-sm font-medium transition-all flex items-center justify-center gap-2"

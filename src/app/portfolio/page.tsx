@@ -275,7 +275,7 @@ export default function Portfolio() {
             
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <a
-                href={`https://wa.me/6281234567890?text=${encodeURIComponent(
+                href={`https://wa.me/62881025741054?text=${encodeURIComponent(
                   "Halo CodingBoy! Saya tertarik membuat website setelah melihat portfolio Anda. Bisa konsultasi gratis?"
                 )}`}
                 target="_blank"

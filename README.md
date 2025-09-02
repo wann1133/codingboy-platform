@@ -29,17 +29,20 @@ Marketplace platform untuk jasa pembuatan website yang menargetkan UKM dan Start
 ## 🚀 Quick Start
 
 ### 1. Clone Repository
+
 ```bash
 git clone https://github.com/wann1133/CodingBoy.git
 cd codingboy-platform
 ```
 
 ### 2. Install Dependencies
+
 ```bash
 npm install
 ```
 
 ### 3. Environment Setup
+
 Buat file `.env.local` dan isi dengan:
 
 ```env
@@ -62,10 +65,11 @@ MIDTRANS_CLIENT_KEY=your_midtrans_client_key
 MIDTRANS_IS_PRODUCTION=false
 
 # WhatsApp Integration
-WHATSAPP_PHONE_NUMBER=+6281234567890
+WHATSAPP_PHONE_NUMBER=+62881025741054
 ```
 
 ### 4. Database Setup
+
 ```bash
 # Generate Prisma Client
 npx prisma generate
@@ -78,6 +82,7 @@ npx prisma db seed
 ```
 
 ### 5. Run Development Server
+
 ```bash
 npm run dev
 ```
@@ -105,6 +110,7 @@ src/
 ## 🎨 Design System
 
 ### Glassmorphism Dark Theme
+
 - **Background**: Gradient dari slate-900 via purple-900 ke slate-900
 - **Glass Cards**: `bg-white/5` dengan `backdrop-blur-md`
 - **Borders**: `border-white/10` untuk subtle outline
@@ -112,6 +118,7 @@ src/
 - **Accents**: Blue-400 dan purple-400 gradients
 
 ### Color Palette
+
 ```css
 Primary: #3b82f6 (Blue-500)
 Secondary: #8b5cf6 (Purple-500)
@@ -125,7 +132,7 @@ Text Secondary: #d1d5db (gray-300)
 ## 📱 Responsive Breakpoints
 
 - **Mobile**: < 768px
-- **Tablet**: 768px - 1024px  
+- **Tablet**: 768px - 1024px
 - **Desktop**: > 1024px
 
 ## 🔧 Konfigurasi Clerk
@@ -142,6 +149,7 @@ Text Secondary: #d1d5db (gray-300)
 ## 💾 Database Schema
 
 ### Key Models:
+
 - **User** - Data user dari Clerk
 - **Service** - Paket layanan (Starter, Business, Enterprise)
 - **Project** - Proyek client dengan status tracking
@@ -154,12 +162,14 @@ Text Secondary: #d1d5db (gray-300)
 ## 🚀 Deployment
 
 ### Vercel (Recommended)
+
 1. Push ke GitHub repository
 2. Connect ke Vercel
 3. Set environment variables
 4. Deploy!
 
 ### Manual Deployment
+
 ```bash
 npm run build
 npm start

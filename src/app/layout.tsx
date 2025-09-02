@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { ClerkProvider } from '@clerk/nextjs';
+import WhatsAppFloat from '@/components/WhatsAppFloat';
 import "./globals.css";
 
 const geistSans = Geist({
@@ -30,6 +31,10 @@ export default function RootLayout({
           className={`${geistSans.variable} ${geistMono.variable} antialiased`}
         >
           {children}
+          <WhatsAppFloat 
+            phoneNumber={process.env.WHATSAPP_PHONE_NUMBER || "+62881025741054"}
+            defaultMessage="Halo CodingBoy! Saya tertarik dengan layanan pembuatan website. Bisa konsultasi gratis?"
+          />
         </body>
       </html>
     </ClerkProvider>

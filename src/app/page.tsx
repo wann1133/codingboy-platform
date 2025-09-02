@@ -212,7 +212,7 @@ export default function Home() {
               className="flex flex-col sm:flex-row gap-4 justify-center"
             >
               <a 
-                href={`https://wa.me/6281234567890?text=${whatsappMessage}`}
+                href={`https://wa.me/62881025741054?text=${whatsappMessage}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white px-8 py-3 rounded-lg text-lg font-medium transition-all flex items-center justify-center gap-2"
@@ -321,7 +321,7 @@ export default function Home() {
                   </ul>
                   
                   <a
-                    href={`https://wa.me/6281234567890?text=${encodeURIComponent(
+                    href={`https://wa.me/62881025741054?text=${encodeURIComponent(
                       `Halo CodingBoy! Saya tertarik dengan ${pkg.name} (${pkg.price}). Bisa diskusi lebih lanjut?`
                     )}`}
                     target="_blank"
@@ -518,7 +518,7 @@ export default function Home() {
             
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <a
-                href={`https://wa.me/6281234567890?text=${whatsappMessage}`}
+                href={`https://wa.me/62881025741054?text=${whatsappMessage}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white px-8 py-4 rounded-lg text-lg font-medium transition-all flex items-center justify-center gap-2"

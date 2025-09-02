@@ -3,6 +3,7 @@
 ## 📋 Prerequisites
 
 Pastikan Anda sudah menginstall:
+
 - Node.js (v18 atau lebih baru)
 - npm atau yarn
 - PostgreSQL database
@@ -11,11 +12,13 @@ Pastikan Anda sudah menginstall:
 ## 🛠 Setup Development
 
 ### 1. Install Dependencies
+
 ```bash
 npm install
 ```
 
 ### 2. Setup Environment Variables
+
 Buat file `.env.local` di root project dengan isi:
 
 ```env
@@ -38,10 +41,11 @@ MIDTRANS_CLIENT_KEY=your_midtrans_client_key
 MIDTRANS_IS_PRODUCTION=false
 
 # WhatsApp Integration
-WHATSAPP_PHONE_NUMBER=+6281234567890
+WHATSAPP_PHONE_NUMBER=+62881025741054
 ```
 
 ### 3. Setup Database
+
 ```bash
 # Generate Prisma Client
 npx prisma generate
@@ -54,6 +58,7 @@ npx prisma studio
 ```
 
 ### 4. Run Development Server
+
 ```bash
 npm run dev
 ```
@@ -63,6 +68,7 @@ Website akan berjalan di: http://localhost:3000
 ## 📱 Fitur yang Sudah Dibuat
 
 ### ✅ Homepage
+
 - Hero section dengan CTA WhatsApp
 - Value propositions (4 poin utama)
 - Service packages (3 tier pricing)
@@ -73,12 +79,14 @@ Website akan berjalan di: http://localhost:3000
 - Footer lengkap
 
 ### ✅ Authentication (Clerk)
+
 - Sign in page dengan glassmorphism theme
 - Sign up page dengan glassmorphism theme
 - Protected routes dengan middleware
 - User session management
 
 ### ✅ Dashboard User
+
 - Welcome section dengan greeting
 - Stats cards (total proyek, progress, dll)
 - Project list dengan status tracking
@@ -87,12 +95,14 @@ Website akan berjalan di: http://localhost:3000
 - Support section
 
 ### ✅ Portfolio Page
+
 - Filter by category
 - Portfolio grid dengan hover effects
 - Project details dengan testimonials
 - CTA section
 
 ### ✅ About Page (Tentang)
+
 - Company story
 - Team members
 - Achievements stats
@@ -100,6 +110,7 @@ Website akan berjalan di: http://localhost:3000
 - Why choose us section
 
 ### ✅ Database Schema
+
 - User management
 - Service packages
 - Project tracking
@@ -110,6 +121,7 @@ Website akan berjalan di: http://localhost:3000
 - Payments
 
 ### ✅ UI/UX Design
+
 - Glassmorphism dark theme
 - Mobile-first responsive
 - Smooth animations dengan Framer Motion
@@ -120,6 +132,7 @@ Website akan berjalan di: http://localhost:3000
 ## 🎨 Design System
 
 ### Color Scheme
+
 - **Primary**: Blue (#3b82f6) to Purple (#8b5cf6) gradient
 - **Background**: Dark gradient (slate-900 → purple-900 → slate-900)
 - **Glass Effect**: `bg-white/5` dengan `backdrop-blur-md`
@@ -127,6 +140,7 @@ Website akan berjalan di: http://localhost:3000
 - **Borders**: `border-white/10`
 
 ### Typography
+
 - **Font**: Geist Sans (primary), Geist Mono (code)
 - **Headings**: Bold, white color
 - **Body**: Regular, gray-300 color
@@ -135,19 +149,22 @@ Website akan berjalan di: http://localhost:3000
 ## 📞 WhatsApp Integration
 
 Semua CTA button sudah terintegrasi dengan WhatsApp:
-- Format: `https://wa.me/6281234567890?text=encoded_message`
+
+- Format: `https://wa.me/62881025741054?text=encoded_message`
 - Pre-filled messages sesuai konteks
 - Nomor WhatsApp bisa diubah di environment variables
 
 ## 🔧 Customization
 
 ### Mengubah Konten
+
 - **Paket Harga**: Edit array `packages` di `src/app/page.tsx`
 - **Portfolio**: Edit array `portfolioItems` di `src/app/portfolio/page.tsx`
 - **Testimonials**: Edit array `testimonials` di `src/app/page.tsx`
 - **Team**: Edit array `teamMembers` di `src/app/tentang/page.tsx`
 
 ### Mengubah Styling
+
 - **Colors**: Edit di `src/app/globals.css`
 - **Components**: Setiap page memiliki styling inline dengan Tailwind
 - **Animations**: Menggunakan Framer Motion untuk smooth transitions
@@ -155,16 +172,19 @@ Semua CTA button sudah terintegrasi dengan WhatsApp:
 ## 🚀 Production Deployment
 
 ### Build Project
+
 ```bash
 npm run build
 ```
 
 ### Start Production Server
+
 ```bash
 npm start
 ```
 
 ### Deploy ke Vercel
+
 1. Push ke GitHub
 2. Connect repository ke Vercel
 3. Set environment variables di Vercel dashboard
@@ -181,16 +201,19 @@ npm start
 ## 🐛 Troubleshooting
 
 ### Error: Clerk keys not found
+
 - Pastikan `.env.local` sudah dibuat
 - Check API keys dari Clerk dashboard
 - Restart development server
 
 ### Error: Database connection
+
 - Pastikan PostgreSQL running
 - Check DATABASE_URL format
 - Run `npx prisma db push` lagi
 
 ### Error: Module not found
+
 - Run `npm install` lagi
 - Clear node_modules dan reinstall
 - Check import paths
@@ -198,6 +221,7 @@ npm start
 ## 📈 Next Steps
 
 Fitur yang bisa ditambahkan:
+
 - [ ] Blog system dengan CMS
 - [ ] Payment integration (Midtrans)
 - [ ] Admin panel untuk manage projects
