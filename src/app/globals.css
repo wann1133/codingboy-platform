@@ -13,10 +13,20 @@
 }
 
 body {
-  background: linear-gradient(135deg, #0f172a, #581c87, #0f172a);
+  background-color: #05070d;
+  background-image:
+    radial-gradient(circle at 1px 1px, rgba(99, 102, 241, 0.08) 1px, transparent 0),
+    radial-gradient(circle at 3px 3px, rgba(15, 23, 42, 0.65) 2px, transparent 0);
+  background-size: 24px 24px, 64px 64px;
   color: var(--foreground);
-  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+  font-family: var(--font-plex-mono), var(--font-sans), 'IBM Plex Mono', monospace;
+  letter-spacing: 0.01em;
   min-height: 100vh;
+}
+
+/* Display font helper (Anton) */
+.font-display {
+  font-family: var(--font-anton), Impact, 'Anton', sans-serif;
 }
 
 /* Custom Glassmorphism Styles */
@@ -173,8 +183,8 @@ body {
 /* Custom Focus States */
 input:focus, textarea:focus, select:focus {
   outline: none;
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  border-color: #6366f1;
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.25);
 }
 
 /* Clerk Component Customization */
@@ -197,6 +207,22 @@ input:focus, textarea:focus, select:focus {
 .chaty-outer-forms.pos-right {
   right: 20px;
   bottom: 20px;
+}
+
+/* Snappy CTAs (token burst) */
+[data-snappy-cta] {
+  position: relative;
+  transform-origin: center;
+}
+
+.snappy-token {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border-radius: 9999px;
+  pointer-events: none;
+  background: radial-gradient(circle at 30% 30%, #8b5cf6, #6366f1 65%, #4338ca 100%);
+  filter: drop-shadow(0 0 8px rgba(99, 102, 241, 0.65));
 }
 
 .chaty-whatsapp-form {

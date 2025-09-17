@@ -17,10 +17,9 @@ import {
   Clock,
   AlertCircle
 } from 'lucide-react';
-import { useUser, UserButton } from '@clerk/nextjs';
+// Auth disabled: removing Clerk usage
 
 export default function AdminDashboard() {
-  const { user, isLoaded } = useUser();
   const [activeTab, setActiveTab] = useState('overview');
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
@@ -161,25 +160,7 @@ export default function AdminDashboard() {
     return matchesSearch && matchesFilter;
   });
 
-  if (!isLoaded) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-400"></div>
-      </div>
-    );
-  }
-
-  // Simple admin check - in real app, you'd check user roles
-  if (!user || !user.emailAddresses[0]?.emailAddress.includes('admin')) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-white mb-4">Access Denied</h1>
-          <p className="text-gray-300">You don't have permission to access this page.</p>
-        </div>
-      </div>
-    );
-  }
+  // Auth disabled: unrestricted access for now
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
@@ -194,14 +175,14 @@ export default function AdminDashboard() {
             </div>
             
             <div className="flex items-center space-x-4">
-              <span className="text-gray-300 text-sm">Welcome, {user.firstName}!</span>
-              <UserButton 
-                appearance={{
-                  elements: {
-                    avatarBox: "w-8 h-8"
-                  }
-                }}
-              />
+              <span className="text-gray-300 text-sm">Welcome, Admin!</span>
+              <a 
+                data-snappy-cta
+                href="/"
+                className="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors inline-block"
+              >
+                Home
+              </a>
             </div>
           </div>
         </div>
