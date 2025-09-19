@@ -1,17 +1,17 @@
-'use client';
+﻿'use client';
 
 import { motion } from 'framer-motion';
-import { 
-  ArrowLeft, 
-  Zap, 
-  Heart, 
-  Target, 
-  Users, 
-  Award, 
-  CheckCircle, 
-  Code, 
-  Smartphone, 
-  ShoppingCart, 
+import {
+  ArrowLeft,
+  Zap,
+  Heart,
+  Target,
+  Users,
+  Award,
+  CheckCircle,
+  Code,
+  Smartphone,
+  ShoppingCart,
   Megaphone,
   Star,
   MessageCircle,
@@ -19,7 +19,9 @@ import {
   Rocket,
   Shield,
   Clock,
-  DollarSign
+  DollarSign,
+  Phone,
+  Linkedin,
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -105,7 +107,7 @@ export default function Tentang() {
     {
       name: "Sarah Entrepreneur",
       business: "Toko Kue Online",
-      text: "Gila sih, dalam 3 hari website toko kue aku udah jadi dan langsung ada yang order! Tim Kerjakode emang the best! 🔥",
+      text: "Gila sih, dalam 3 hari website toko kue aku udah jadi dan langsung ada yang order! Tim Kerjakode emang the best! ðŸ”¥",
       rating: 5,
       avatar: "SE"
     },
@@ -124,6 +126,25 @@ export default function Tentang() {
       avatar: "BU"
     }
   ];
+
+  const teamMembers = [
+    {
+      initials: "LM",
+      name: "Luthfi Mirza",
+      role: "Co-Founder & Fullstack Developer",
+      phoneDisplay: "+62 856-0940-8506",
+      phoneLink: "tel:+6285609408506",
+      linkedin: "https://www.linkedin.com/in/luthfi-mirza-darsono-675663242/",
+    },
+    {
+      initials: "AF",
+      name: "Alwan Farras",
+      role: "Co-Founder & UI/UX Specialist",
+      phoneDisplay: "+62 881-0257-41054",
+      phoneLink: "tel:+62881025741054",
+      linkedin: "https://www.linkedin.com/in/muhammad-alwan-farras-76829728b/",
+    },
+  ] as const;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
@@ -162,7 +183,7 @@ export default function Tentang() {
             </span>{" "}
             adalah Solusi
             <br />
-            Website Impian Kamu! ✨
+            Website Impian Kamu! âœ¨
           </h2>
           
           <p className="text-xl text-gray-300 mb-8 max-w-4xl mx-auto leading-relaxed">
@@ -172,7 +193,7 @@ export default function Tentang() {
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <a
-              href={`https://wa.me/6288102574105?text=${encodeURIComponent("Halo Kerjakode! Saya mau konsultasi gratis tentang website impian saya 🚀")}`}
+              href={`https://wa.me/6288102574105?text=${encodeURIComponent("Halo Kerjakode! Saya mau konsultasi gratis tentang website impian saya ðŸš€")}`}
               target="_blank"
               rel="noopener noreferrer"
               className="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white px-8 py-4 rounded-xl text-lg font-semibold transition-all flex items-center justify-center gap-2 shadow-lg hover:shadow-xl"
@@ -186,6 +207,62 @@ export default function Tentang() {
             >
               Lihat Hasil Karya Kami
             </Link>
+          </div>
+        </motion.section>
+
+        {/* Team */}
+        <motion.section
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.15 }}
+          className="mb-20"
+        >
+          <div className="text-center mb-12">
+            <h3 className="text-3xl font-bold text-white mb-4">Meet The People Behind CodingBoy</h3>
+            <p className="text-gray-300 text-lg">
+              Duo kreatif yang memastikan setiap proyek berjalan rapi, strategis, dan tepat waktu.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
+            {teamMembers.map((member, index) => (
+              <motion.div
+                key={member.name}
+                initial={{ opacity: 0, y: 24 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.15 + index * 0.08, ease: 'easeOut' }}
+                className="relative overflow-hidden rounded-3xl border border-white/10 bg-white/5 p-8 backdrop-blur-md transition-all hover:border-[#6d6bff] hover:bg-white/10"
+              >
+                <div className="absolute inset-0 -z-10 bg-gradient-to-br from-[#6d6bff]/15 via-transparent to-[#a855f7]/15 opacity-0 transition-opacity duration-300 hover:opacity-100" />
+                <div className="flex items-center gap-4 mb-6">
+                  <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-[#6d6bff] to-[#a855f7] text-xl font-semibold text-white shadow-[0_12px_32px_rgba(104,97,255,0.45)]">
+                    {member.initials}
+                  </div>
+                  <div>
+                    <h4 className="text-2xl font-semibold text-white">{member.name}</h4>
+                    <p className="text-sm uppercase tracking-[0.3em] text-[#8b5cf6]">{member.role}</p>
+                  </div>
+                </div>
+
+                <div className="space-y-4 text-sm text-slate-300">
+                  <div className="flex items-center gap-3">
+                    <Phone className="h-4 w-4 text-[#6d6bff]" />
+                    <a href={member.phoneLink} className="text-white hover:text-[#a855f7]">{member.phoneDisplay}</a>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <Linkedin className="h-4 w-4 text-[#6d6bff]" />
+                    <a
+                      href={member.linkedin}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-white hover:text-[#a855f7]"
+                    >
+                      LinkedIn Profile
+                    </a>
+                  </div>
+                </div>
+              </motion.div>
+            ))}
           </div>
         </motion.section>
 
@@ -293,7 +370,7 @@ export default function Tentang() {
           <div className="text-center mb-12">
             <h3 className="text-3xl font-bold text-white mb-4">Kenapa Harus Pilih Kerjakode?</h3>
             <p className="text-gray-300 text-lg">
-              Ini yang bikin kami beda dari yang lain dan jadi pilihan utama ratusan client! 🔥
+              Ini yang bikin kami beda dari yang lain dan jadi pilihan utama ratusan client! ðŸ”¥
             </p>
           </div>
 
@@ -326,7 +403,7 @@ export default function Tentang() {
           <div className="text-center mb-12">
             <h3 className="text-3xl font-bold text-white mb-4">Kata Mereka yang Udah Merasakan</h3>
             <p className="text-gray-300 text-lg">
-              Real testimonials dari client yang websitenya udah bikin bisnis mereka naik level! 📈
+              Real testimonials dari client yang websitenya udah bikin bisnis mereka naik level! ðŸ“ˆ
             </p>
           </div>
 
@@ -371,7 +448,7 @@ export default function Tentang() {
           <div className="bg-gradient-to-r from-blue-600/20 to-purple-600/20 backdrop-blur-md border border-white/10 rounded-3xl p-12">
             <Rocket className="w-16 h-16 text-blue-400 mx-auto mb-6" />
             <h3 className="text-4xl font-bold text-white mb-6">
-              Let Us Code It For You! 🚀
+              Let Us Code It For You! ðŸš€
             </h3>
             <p className="text-xl text-gray-300 mb-8 max-w-3xl mx-auto leading-relaxed">
               <span className="text-blue-400 font-semibold">Kamu tinggal duduk santai, biar kami yang kerjakan.</span>
@@ -382,7 +459,7 @@ export default function Tentang() {
             
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <a
-                href={`https://wa.me/6288102574105?text=${encodeURIComponent("Halo Kerjakode! Saya siap wujudkan website impian saya. Let's make it happen! 🔥")}`}
+                href={`https://wa.me/6288102574105?text=${encodeURIComponent("Halo Kerjakode! Saya siap wujudkan website impian saya. Let's make it happen! ðŸ”¥")}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white px-8 py-4 rounded-xl text-lg font-semibold transition-all flex items-center justify-center gap-2 shadow-lg hover:shadow-xl"
@@ -411,3 +488,5 @@ export default function Tentang() {
     </div>
   );
 }
+
+
