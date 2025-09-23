@@ -1,9 +1,9 @@
-'use client';
+﻿'use client';
 
 import { useState } from 'react';
 import { motion } from 'framer-motion';
+import PrimaryNav from '@/components/PrimaryNav';
 import { 
-  ArrowLeft, 
   MessageCircle, 
   Mail, 
   Phone, 
@@ -16,7 +16,6 @@ import {
   Award,
   Zap
 } from 'lucide-react';
-import Link from 'next/link';
 
 export default function Kontak() {
   const [formData, setFormData] = useState({
@@ -67,41 +66,45 @@ export default function Kontak() {
     {
       icon: <MessageCircle className="w-6 h-6" />,
       title: "WhatsApp",
-      value: "+62 881-0257-41054",
+      value: "+62 815-3279-7240",
       description: "Chat langsung untuk konsultasi cepat",
       color: "text-green-400",
-      action: () => window.open(`https://wa.me/6288102574105?text=${encodeURIComponent("Halo CodingBoy! Saya ingin konsultasi tentang pembuatan website.")}`, '_blank')
+      action: () =>
+        window.open(
+          `https://wa.me/6281532797240?text=${encodeURIComponent("Halo CodingBoy! Saya ingin konsultasi tentang pembuatan website.")}`,
+          '_blank',
+        )
     },
     {
       icon: <Mail className="w-6 h-6" />,
       title: "Email",
-      value: "hello@codingboy.id",
+      value: "codingboy969@gmail.com",
       description: "Untuk inquiry detail dan proposal",
       color: "text-blue-400",
-      action: () => window.open('mailto:hello@codingboy.id', '_blank')
+      action: () => window.open('mailto:codingboy969@gmail.com', '_blank')
     },
     {
       icon: <Phone className="w-6 h-6" />,
       title: "Telepon",
-      value: "(021) 1234-5678",
+      value: "+62 815-3279-7240",
       description: "Jam kerja: Senin-Sabtu 09:00-18:00",
       color: "text-purple-400",
-      action: () => window.open('tel:+622112345678', '_blank')
+      action: () => window.open('tel:+6281532797240', '_blank')
     },
     {
       icon: <MapPin className="w-6 h-6" />,
-      title: "Alamat",
-      value: "Jakarta Selatan, Indonesia",
-      description: "Kunjungi kantor kami (by appointment)",
+      title: "lynk.id",
+      value: "lynk.id/codingboy",
+      description: "Lihat semua link & profil digital kami",
       color: "text-red-400",
-      action: () => window.open('https://maps.google.com/?q=Jakarta+Selatan', '_blank')
+      action: () => window.open('https://lynk.id/codingboy', '_blank')
     }
   ];
 
   const workingHours = [
     { day: "Senin - Jumat", hours: "09:00 - 18:00 WIB" },
     { day: "Sabtu", hours: "09:00 - 15:00 WIB" },
-    { day: "Minggu", hours: "Tutup" }
+    { day: "Minggu", hours: "09:00 - 15:00 WIB" }
   ];
 
   const whyChooseUs = [
@@ -146,38 +149,42 @@ export default function Kontak() {
     }
   ];
 
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
-      {/* Navigation */}
-      <nav className="bg-black/20 backdrop-blur-md border-b border-white/10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center">
-              <Link href="/" className="flex items-center text-gray-300 hover:text-white transition-colors mr-6">
-                <ArrowLeft className="w-5 h-5 mr-2" />
-                Kembali
-              </Link>
-              <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
-                Kontak
-              </h1>
-            </div>
-          </div>
-        </div>
-      </nav>
+  const navLabels = {
+    tentang: 'Tentang',
+    portfolio: 'Portfolio',
+    blog: 'Blog',
+    contact: 'Kontak',
+  } as const;
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+  return (
+    <div className="relative min-h-screen overflow-hidden bg-[#05070d] text-slate-100">
+      <div className="pointer-events-none absolute inset-0 -z-10">
+        <div className="absolute -top-32 left-1/2 h-96 w-96 -translate-x-1/2 rounded-full bg-[#6d6bff]/20 blur-3xl" />
+        <div className="absolute top-1/3 -left-32 h-[420px] w-[420px] rounded-full bg-[#a855f7]/15 blur-[200px]" />
+        <div className="absolute bottom-0 right-0 h-[340px] w-[340px] translate-x-1/4 translate-y-1/4 rounded-full bg-[#0ea5e9]/10 blur-[180px]" />
+      </div>
+
+      <PrimaryNav labels={navLabels} />
+
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 pt-32">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="text-center mb-12"
+          className="relative mb-12 overflow-hidden rounded-3xl border border-[#1b253a] bg-gradient-to-br from-[#0f172a]/85 to-[#050a18]/95 p-10 text-center shadow-[0_30px_80px_rgba(5,10,25,0.6)]"
         >
-          <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">
+          <div className="pointer-events-none absolute inset-0">
+            <div className="absolute left-1/2 top-0 h-32 w-[120%] -translate-x-1/2 bg-gradient-to-r from-transparent via-[#6d6bff]/20 to-transparent blur-2xl" />
+            <div className="absolute bottom-0 right-1/3 h-24 w-24 rounded-full bg-[#a855f7]/20 blur-3xl" />
+          </div>
+          <span className="relative inline-flex items-center justify-center rounded-full border border-[#273149] bg-[#080f1f]/80 px-4 py-1 text-xs font-semibold uppercase tracking-[0.32em] text-[#8b5cf6]">
+            Let's Talk
+          </span>
+          <h2 className="relative mt-6 text-4xl md:text-5xl font-bold text-white">
             Hubungi Kami
           </h2>
-          <p className="text-gray-300 text-lg max-w-2xl mx-auto">
-            Siap membantu mewujudkan website impian bisnis Anda. 
-            Konsultasi gratis dan respon cepat dalam 1 jam!
+          <p className="relative mx-auto mt-4 max-w-2xl text-lg text-slate-300">
+            Siap membantu mewujudkan website impian bisnis Anda. Konsultasi gratis dan respon cepat dalam 1 jam!
           </p>
         </motion.div>
 
@@ -188,7 +195,7 @@ export default function Kontak() {
           transition={{ delay: 0.2 }}
           className="mb-16"
         >
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
             {contactInfo.map((contact, index) => (
               <motion.div
                 key={index}
@@ -196,28 +203,28 @@ export default function Kontak() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1 * index }}
                 onClick={contact.action}
-                className="bg-white/5 backdrop-blur-md border border-white/10 rounded-xl p-6 hover:bg-white/10 transition-all cursor-pointer group"
+                className="group cursor-pointer rounded-2xl border border-[#1f2b42] bg-[#0b1424]/70 p-6 shadow-[0_18px_40px_rgba(5,10,25,0.35)] transition-all hover:border-[#6d6bff] hover:shadow-[0_22px_60px_rgba(99,102,241,0.35)]"
               >
                 <div className={`${contact.color} mb-4 group-hover:scale-110 transition-transform`}>
                   {contact.icon}
                 </div>
                 <h3 className="text-lg font-semibold text-white mb-2">{contact.title}</h3>
-                <p className="text-blue-400 font-medium mb-2">{contact.value}</p>
-                <p className="text-gray-300 text-sm">{contact.description}</p>
+                <p className="text-[#8b5cf6] font-medium mb-2">{contact.value}</p>
+                <p className="text-slate-300 text-sm">{contact.description}</p>
               </motion.div>
             ))}
           </div>
         </motion.section>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-          {/* Contact Form */}
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.4 }}
-            className="bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-8"
-          >
-            <h3 className="text-2xl font-bold text-white mb-6">Kirim Pesan</h3>
+          <div className="grid grid-cols-1 gap-12 lg:grid-cols-2">
+            {/* Contact Form */}
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.4 }}
+              className="rounded-3xl border border-[#1f2b42] bg-[#080f1f]/75 p-8 shadow-[0_24px_70px_rgba(5,10,25,0.5)]"
+            >
+              <h3 className="text-2xl font-bold text-white mb-6">Kirim Pesan</h3>
             
             {isSubmitted ? (
               <motion.div
@@ -244,7 +251,7 @@ export default function Kontak() {
                       value={formData.name}
                       onChange={handleInputChange}
                       required
-                      className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-400"
+                      className="w-full rounded-lg border border-[#1f2b42] bg-[#050c1a]/80 px-4 py-3 text-white placeholder-slate-400 transition focus:border-[#6d6bff] focus:outline-none focus:ring-1 focus:ring-[#6d6bff]"
                       placeholder="Masukkan nama lengkap"
                     />
                   </div>
@@ -259,7 +266,7 @@ export default function Kontak() {
                       value={formData.email}
                       onChange={handleInputChange}
                       required
-                      className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-400"
+                      className="w-full rounded-lg border border-[#1f2b42] bg-[#050c1a]/80 px-4 py-3 text-white placeholder-slate-400 transition focus:border-[#6d6bff] focus:outline-none focus:ring-1 focus:ring-[#6d6bff]"
                       placeholder="nama@email.com"
                     />
                   </div>
@@ -275,7 +282,7 @@ export default function Kontak() {
                     value={formData.phone}
                     onChange={handleInputChange}
                     required
-                    className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-400"
+                    className="w-full rounded-lg border border-[#1f2b42] bg-[#050c1a]/80 px-4 py-3 text-white placeholder-slate-400 transition focus:border-[#6d6bff] focus:outline-none focus:ring-1 focus:ring-[#6d6bff]"
                     placeholder="+62 812-3456-7890"
                   />
                 </div>
@@ -289,7 +296,7 @@ export default function Kontak() {
                       name="service"
                       value={formData.service}
                       onChange={handleInputChange}
-                      className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white focus:outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-400"
+                      className="w-full rounded-lg border border-[#1f2b42] bg-[#050c1a]/80 px-4 py-3 text-white transition focus:border-[#6d6bff] focus:outline-none focus:ring-1 focus:ring-[#6d6bff]"
                     >
                       <option value="">Pilih layanan</option>
                       <option value="starter">Paket Starter</option>
@@ -308,7 +315,7 @@ export default function Kontak() {
                       name="budget"
                       value={formData.budget}
                       onChange={handleInputChange}
-                      className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white focus:outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-400"
+                      className="w-full rounded-lg border border-[#1f2b42] bg-[#050c1a]/80 px-4 py-3 text-white transition focus:border-[#6d6bff] focus:outline-none focus:ring-1 focus:ring-[#6d6bff]"
                     >
                       <option value="">Pilih budget</option>
                       <option value="1-3">Rp 1-3 Juta</option>
@@ -327,7 +334,7 @@ export default function Kontak() {
                     name="timeline"
                     value={formData.timeline}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white focus:outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-400"
+                    className="w-full rounded-lg border border-[#1f2b42] bg-[#050c1a]/80 px-4 py-3 text-white transition focus:border-[#6d6bff] focus:outline-none focus:ring-1 focus:ring-[#6d6bff]"
                   >
                     <option value="">Pilih timeline</option>
                     <option value="urgent">Urgent (1-3 hari)</option>
@@ -346,7 +353,7 @@ export default function Kontak() {
                     onChange={handleInputChange}
                     required
                     rows={4}
-                    className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-400 resize-none"
+                    className="w-full resize-none rounded-lg border border-[#1f2b42] bg-[#050c1a]/80 px-4 py-3 text-white placeholder-slate-400 transition focus:border-[#6d6bff] focus:outline-none focus:ring-1 focus:ring-[#6d6bff]"
                     placeholder="Jelaskan kebutuhan website Anda, fitur yang diinginkan, referensi design, dll..."
                   />
                 </div>
@@ -354,7 +361,7 @@ export default function Kontak() {
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 disabled:from-gray-600 disabled:to-gray-700 text-white py-4 px-6 rounded-lg font-medium transition-all flex items-center justify-center gap-2"
+                  className="flex w-full items-center justify-center gap-2 rounded-full bg-gradient-to-r from-[#6d6bff] to-[#a855f7] py-4 px-6 text-base font-semibold text-white shadow-[0_18px_45px_rgba(104,97,255,0.45)] transition-all hover:shadow-[0_22px_55px_rgba(104,97,255,0.55)] disabled:from-[#1f273d] disabled:to-[#1f273d] disabled:opacity-70"
                 >
                   {isSubmitting ? (
                     <>
@@ -380,7 +387,7 @@ export default function Kontak() {
             className="space-y-8"
           >
             {/* Working Hours */}
-            <div className="bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-8">
+            <div className="rounded-2xl border border-[#1f2b42] bg-[#080f1f]/75 p-8 shadow-[0_18px_45px_rgba(5,10,25,0.45)]">
               <h3 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
                 <Clock className="w-6 h-6 text-blue-400" />
                 Jam Operasional
@@ -393,15 +400,15 @@ export default function Kontak() {
                   </div>
                 ))}
               </div>
-              <div className="mt-6 p-4 bg-green-400/10 border border-green-400/20 rounded-lg">
-                <p className="text-green-400 text-sm">
-                  💬 WhatsApp tersedia 24/7 untuk pertanyaan urgent
+              <div className="mt-6 rounded-xl border border-[#1f402c] bg-[#0b2418]/70 p-4">
+                <p className="text-sm text-emerald-300">
+                  WhatsApp tersedia 24/7 untuk pertanyaan urgent
                 </p>
               </div>
             </div>
 
             {/* Why Choose Us */}
-            <div className="bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-8">
+            <div className="rounded-2xl border border-[#1f2b42] bg-[#080f1f]/75 p-8 shadow-[0_18px_45px_rgba(5,10,25,0.45)]">
               <h3 className="text-xl font-bold text-white mb-6">Mengapa Pilih Kami?</h3>
               <div className="space-y-4">
                 {whyChooseUs.map((item, index) => (
@@ -419,16 +426,16 @@ export default function Kontak() {
             </div>
 
             {/* Quick Contact */}
-            <div className="bg-gradient-to-r from-green-600/20 to-green-700/20 backdrop-blur-md border border-white/10 rounded-2xl p-8">
+            <div className="rounded-2xl border border-[#1f2b42] bg-gradient-to-br from-[#0b2418]/85 via-[#0a1624]/85 to-[#0f1a2d]/85 p-8 shadow-[0_20px_60px_rgba(4,12,30,0.5)]">
               <h3 className="text-xl font-bold text-white mb-4">Butuh Respon Cepat?</h3>
               <p className="text-gray-300 mb-6">
                 Langsung chat WhatsApp untuk konsultasi gratis dan mendapatkan penawaran khusus!
               </p>
               <a
-                href={`https://wa.me/6288102574105?text=${encodeURIComponent("Halo CodingBoy! Saya ingin konsultasi tentang pembuatan website.")}`}
+                href={`https://wa.me/6281532797240?text=${encodeURIComponent("Halo CodingBoy! Saya ingin konsultasi tentang pembuatan website.")}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-full bg-green-600 hover:bg-green-700 text-white py-3 px-6 rounded-lg font-medium transition-all flex items-center justify-center gap-2"
+                className="flex w-full items-center justify-center gap-2 rounded-full bg-gradient-to-r from-emerald-500 to-emerald-400 py-3 px-6 text-sm font-semibold text-[#04110c] transition-all hover:shadow-[0_18px_40px_rgba(16,185,129,0.45)]"
               >
                 <MessageCircle className="w-5 h-5" />
                 Chat WhatsApp Sekarang
@@ -460,7 +467,7 @@ export default function Kontak() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1 * index }}
-                className="bg-white/5 backdrop-blur-md border border-white/10 rounded-xl p-6"
+                className="rounded-2xl border border-[#1f2b42] bg-[#080f1f]/70 p-6 shadow-[0_16px_40px_rgba(5,10,25,0.4)] hover:border-[#6d6bff] hover:shadow-[0_20px_52px_rgba(99,102,241,0.32)]"
               >
                 <h4 className="text-lg font-semibold text-white mb-3">
                   {faq.question}
@@ -476,3 +483,5 @@ export default function Kontak() {
     </div>
   );
 }
+
+

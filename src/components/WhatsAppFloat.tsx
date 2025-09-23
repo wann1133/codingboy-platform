@@ -14,15 +14,30 @@ export default function WhatsAppFloat({
   defaultMessage = "Halo CodingBoy! Saya tertarik dengan layanan pembuatan website. Bisa konsultasi gratis?"
 }: WhatsAppFloatProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const [message, setMessage] = useState(defaultMessage);
+  const [message, setMessage] = useState("");
   const [isVisible, setIsVisible] = useState(false);
 
-  // Show button after page loads
+  // Tampilkan tombol hanya setelah melewati section hero (#beranda)
   useEffect(() => {
-    const timer = setTimeout(() => {
+    const hero = document.querySelector('#beranda');
+
+    // Jika tidak ada section hero (misal bukan halaman utama), tampilkan langsung
+    if (!hero) {
       setIsVisible(true);
-    }, 2000);
-    return () => clearTimeout(timer);
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const entry = entries[0];
+        // Saat hero tidak terlihat sama sekali di viewport, tampilkan tombol
+        setIsVisible(!entry.isIntersecting);
+      },
+      { threshold: 0.01 }
+    );
+
+    observer.observe(hero);
+    return () => observer.disconnect();
   }, []);
 
   const handleSendMessage = () => {
@@ -70,7 +85,7 @@ export default function WhatsAppFloat({
               className="chaty-whatsapp-form fixed bottom-24 right-4 md:right-6 w-80 max-w-[calc(100vw-2rem)] bg-white rounded-2xl shadow-2xl z-50 overflow-hidden"
             >
               {/* Header */}
-              <div className="bg-gradient-to-r from-green-600 to-green-700 p-4 text-white">
+              <div className="bg-[#128C7E] p-4 text-white">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
@@ -90,26 +105,24 @@ export default function WhatsAppFloat({
                 </div>
               </div>
 
-              {/* Chat Bubble */}
-              <div className="p-4 bg-gray-50">
-                <div className="bg-white rounded-lg p-3 shadow-sm mb-3">
-                  <p className="text-sm text-gray-700">
-                    👋 Halo! Selamat datang di CodingBoy. 
-                    <br />
-                    Ada yang bisa kami bantu untuk website bisnis Anda?
-                  </p>
+              {/* Chat Area */}
+              <div className="h-72 overflow-y-auto bg-[#efeae2] p-3 chat-messages">
+                <div className="max-w-[80%] rounded-2xl rounded-tl-sm bg-white px-3 py-2 text-sm text-gray-800 shadow">
+                  👋 Halo! Selamat datang di CodingBoy.
+                  <br />
+                  Ada yang bisa kami bantu untuk website bisnis Anda?
+                  <div className="text-[10px] text-gray-500 mt-1 text-right">Sekarang</div>
                 </div>
               </div>
 
               {/* Quick Messages */}
-              <div className="px-4 pb-3">
-                <p className="text-xs text-gray-500 mb-2">Pesan cepat:</p>
-                <div className="space-y-1 max-h-32 overflow-y-auto chat-messages">
+              <div className="px-3 py-2 border-t border-gray-200 bg-white">
+                <div className="flex items-center gap-2 overflow-x-auto">
                   {quickMessages.map((quickMsg, index) => (
                     <button
                       key={index}
                       onClick={() => setMessage(quickMsg)}
-                      className="w-full text-left text-xs bg-gray-100 hover:bg-gray-200 rounded-lg p-2 transition-colors"
+                      className="shrink-0 px-3 py-1.5 rounded-full bg-gray-100 hover:bg-gray-200 text-xs text-gray-700"
                     >
                       {quickMsg}
                     </button>
@@ -118,26 +131,25 @@ export default function WhatsAppFloat({
               </div>
 
               {/* Message Input */}
-              <div className="p-4 border-t border-gray-200">
-                <div className="flex gap-2">
+              <div className="p-3 border-t border-gray-200 bg-white">
+                <div className="flex items-end gap-2">
                   <textarea
                     value={message}
                     onChange={(e) => setMessage(e.target.value)}
-                    placeholder="Ketik pesan Anda..."
-                    className="flex-1 resize-none border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500"
-                    rows={2}
+                    onInput={(e) => { const el = e.currentTarget; el.style.height = 'auto'; el.style.height = Math.min(el.scrollHeight, 120) + 'px'; }}
+                    placeholder={defaultMessage}
+                    spellCheck={false}
+                    className="flex-1 max-h-28 min-h-[40px] resize-none bg-gray-100 border border-gray-200 rounded-2xl px-3 py-2 text-sm text-gray-800 focus:outline-none focus:border-[#128C7E] focus:ring-1 focus:ring-[#128C7E]/40"
+                    rows={1}
                   />
                   <button
                     onClick={handleSendMessage}
                     disabled={!message.trim()}
-                    className="bg-green-600 hover:bg-green-700 disabled:bg-gray-300 text-white rounded-lg px-4 py-2 transition-colors flex items-center justify-center"
+                    className={`rounded-full w-10 h-10 flex items-center justify-center transition-colors ${message.trim() ? 'bg-[#25D366] hover:bg-[#1ebe57] text-white' : 'bg-gray-200 text-gray-400 cursor-not-allowed'}`}
                   >
                     <Send className="w-4 h-4" />
                   </button>
                 </div>
-                <p className="text-xs text-gray-500 mt-2 text-center">
-                  Dengan mengirim pesan, Anda akan diarahkan ke WhatsApp
-                </p>
               </div>
             </motion.div>
           )}

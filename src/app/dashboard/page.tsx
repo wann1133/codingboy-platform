@@ -1,6 +1,4 @@
 'use client';
-
-import { useUser, UserButton } from '@clerk/nextjs';
 import { motion } from 'framer-motion';
 import { 
   Globe, 
@@ -16,7 +14,6 @@ import {
 } from 'lucide-react';
 
 export default function Dashboard() {
-  const { user } = useUser();
 
   const projects = [
     {
@@ -89,18 +86,13 @@ export default function Dashboard() {
             
             <div className="flex items-center space-x-4">
               <a 
+                data-snappy-cta
                 href="/"
-                className="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors"
+                className="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors inline-block"
               >
                 Beranda
               </a>
-              <UserButton 
-                appearance={{
-                  elements: {
-                    avatarBox: "w-8 h-8"
-                  }
-                }}
-              />
+              {/* Auth disabled */}
             </div>
           </div>
         </div>
@@ -113,9 +105,7 @@ export default function Dashboard() {
           animate={{ opacity: 1, y: 0 }}
           className="mb-8"
         >
-          <h2 className="text-3xl font-bold text-white mb-2">
-            Selamat datang, {user?.firstName}! 👋
-          </h2>
+          <h2 className="text-3xl font-bold text-white mb-2">Selamat datang! 👋</h2>
           <p className="text-gray-300">
             Kelola proyek website Anda dan pantau progress pengerjaan
           </p>

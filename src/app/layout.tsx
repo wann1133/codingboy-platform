@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
-import { ClerkProvider } from '@clerk/nextjs';
+import { Geist, Geist_Mono, Anton, IBM_Plex_Mono } from "next/font/google";
 import WhatsAppFloat from '@/components/WhatsAppFloat';
+import SnappyCTAs from '@/components/SnappyCTAs';
+import { LanguageProvider } from '@/components/LanguageContext';
 import "./globals.css";
 
 const geistSans = Geist({
@@ -11,6 +12,18 @@ const geistSans = Geist({
 
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
+  subsets: ["latin"],
+});
+
+const anton = Anton({
+  variable: "--font-anton",
+  weight: "400",
+  subsets: ["latin"],
+});
+
+const plexMono = IBM_Plex_Mono({
+  variable: "--font-plex-mono",
+  weight: ["400", "500", "600"],
   subsets: ["latin"],
 });
 
@@ -25,18 +38,19 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <ClerkProvider>
-      <html lang="id">
-        <body
-          className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-        >
+    <html lang="id">
+      <body
+        className={`${geistSans.variable} ${geistMono.variable} ${anton.variable} ${plexMono.variable} antialiased`}
+      >
+        <LanguageProvider>
           {children}
+          <SnappyCTAs />
           <WhatsAppFloat 
             phoneNumber={process.env.WHATSAPP_PHONE_NUMBER || "+62881025741054"}
             defaultMessage="Halo CodingBoy! Saya tertarik dengan layanan pembuatan website. Bisa konsultasi gratis?"
           />
-        </body>
-      </html>
-    </ClerkProvider>
+        </LanguageProvider>
+      </body>
+    </html>
   );
 }
