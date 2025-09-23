@@ -105,14 +105,14 @@ export default function Tentang() {
     {
       name: "Sarah Entrepreneur",
       business: "Toko Kue Online",
-      text: "Gila sih, dalam 3 hari website toko kue aku udah jadi dan langsung ada yang order! Tim Kerjakode emang the best! 🔥",
+      text: "Gila sih, dalam 3 hari website toko kue aku udah jadi dan langsung ada yang order! Tim CodingBoy emang the best! 🔥",
       rating: 5,
       avatar: "SE"
     },
     {
       name: "Andi Freelancer",
       business: "Graphic Designer",
-      text: "Portfolio website yang dibuat Kerjakode bikin aku dapet klien baru terus. ROI-nya crazy banget! Worth it!",
+      text: "Portfolio website yang dibuat CodingBoy bikin aku dapet klien baru terus. ROI-nya crazy banget! Worth it!",
       rating: 5,
       avatar: "AF"
     },
@@ -158,7 +158,7 @@ export default function Tentang() {
           
           <h2 className="text-4xl md:text-6xl font-bold text-white mb-6">
             <span className="bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
-              Kerjakode
+              CodingBoy
             </span>{" "}
             adalah Solusi
             <br />
@@ -172,7 +172,7 @@ export default function Tentang() {
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <a
-              href={`https://wa.me/6288102574105?text=${encodeURIComponent("Halo Kerjakode! Saya mau konsultasi gratis tentang website impian saya 🚀")}`}
+              href={`https://wa.me/6288102574105?text=${encodeURIComponent("Halo CodingBoy! Saya mau konsultasi gratis tentang website impian saya 🚀")}`}
               target="_blank"
               rel="noopener noreferrer"
               className="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white px-8 py-4 rounded-xl text-lg font-semibold transition-all flex items-center justify-center gap-2 shadow-lg hover:shadow-xl"
@@ -291,7 +291,7 @@ export default function Tentang() {
           className="mb-20"
         >
           <div className="text-center mb-12">
-            <h3 className="text-3xl font-bold text-white mb-4">Kenapa Harus Pilih Kerjakode?</h3>
+            <h3 className="text-3xl font-bold text-white mb-4">Kenapa Harus Pilih CodingBoy?</h3>
             <p className="text-gray-300 text-lg">
               Ini yang bikin kami beda dari yang lain dan jadi pilihan utama ratusan client! 🔥
             </p>
@@ -382,7 +382,7 @@ export default function Tentang() {
             
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <a
-                href={`https://wa.me/6288102574105?text=${encodeURIComponent("Halo Kerjakode! Saya siap wujudkan website impian saya. Let's make it happen! 🔥")}`}
+                href={`https://wa.me/6288102574105?text=${encodeURIComponent("Halo CodingBoy! Saya siap wujudkan website impian saya. Let's make it happen! 🔥")}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white px-8 py-4 rounded-xl text-lg font-semibold transition-all flex items-center justify-center gap-2 shadow-lg hover:shadow-xl"
