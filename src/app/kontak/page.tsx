@@ -2,8 +2,8 @@
 
 import { useState } from 'react';
 import { motion } from 'framer-motion';
+import PrimaryNav from '@/components/PrimaryNav';
 import { 
-  ArrowLeft, 
   MessageCircle, 
   Mail, 
   Phone, 
@@ -16,7 +16,6 @@ import {
   Award,
   Zap
 } from 'lucide-react';
-import Link from 'next/link';
 
 export default function Kontak() {
   const [formData, setFormData] = useState({
@@ -150,6 +149,13 @@ export default function Kontak() {
     }
   ];
 
+  const navLabels = {
+    tentang: 'Tentang',
+    portfolio: 'Portfolio',
+    blog: 'Blog',
+    contact: 'Kontak',
+  } as const;
+
   return (
     <div className="relative min-h-screen overflow-hidden bg-[#05070d] text-slate-100">
       <div className="pointer-events-none absolute inset-0 -z-10">
@@ -158,31 +164,9 @@ export default function Kontak() {
         <div className="absolute bottom-0 right-0 h-[340px] w-[340px] translate-x-1/4 translate-y-1/4 rounded-full bg-[#0ea5e9]/10 blur-[180px]" />
       </div>
 
-      {/* Navigation */}
-      <nav className="bg-[#060912]/80 border-b border-[#10182b] shadow-[0_12px_40px_rgba(0,0,0,0.45)]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between py-4 sm:py-5">
-            <Link href="/" aria-label="CodingBoy" className="flex items-center">
-              <div className="relative flex h-14 w-auto items-center sm:h-16">
-                <img src="/logo.png" alt="CodingBoy" className="nav-logo-base h-full w-auto" loading="eager" />
-                <img src="/orang jalan.png" alt="" aria-hidden="true" className="nav-logo-walker" loading="lazy" />
-              </div>
-              <span className="sr-only">CodingBoy</span>
-            </Link>
-            <div className="flex items-center gap-3">
-              <Link
-                href="/"
-                className="inline-flex items-center gap-2 rounded-full border border-[#273149] bg-[#0b1324]/70 px-4 py-2 text-sm font-medium text-slate-200 hover:border-[#6d6bff] hover:text-white"
-              >
-                <ArrowLeft className="h-4 w-4" />
-                Kembali ke Beranda
-              </Link>
-            </div>
-          </div>
-        </div>
-      </nav>
+      <PrimaryNav labels={navLabels} />
 
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 pt-32">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}

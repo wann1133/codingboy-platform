@@ -257,36 +257,37 @@ input:focus, textarea:focus, select:focus {
 
 .nav-logo-walker {
   position: absolute;
-  bottom: -6%;
-  right: -18%;
-  height: 70%;
+  bottom: -10%;
+  right: -6%;
+  height: 58%;
   width: auto;
   pointer-events: none;
   object-fit: contain;
-  animation: nav-logo-walker-path 6s ease-in-out infinite alternate;
+  transform-origin: center;
+  animation: nav-logo-walker-path 5.5s ease-in-out infinite;
   will-change: transform, opacity;
 }
 
 @keyframes nav-logo-walker-path {
   0% {
-    transform: translate(55%, 25%) scale(0.9);
+    transform: translate3d(68%, 42%, 0) scale(0.55);
     opacity: 0;
   }
-  10% {
-    transform: translate(35%, 15%) scale(0.95);
+  22% {
+    transform: translate3d(36%, 18%, 0) scale(0.62);
+    opacity: 0.75;
+  }
+  55% {
+    transform: translate3d(8%, -10%, 0) scale(0.7);
     opacity: 1;
   }
-  45% {
-    transform: translate(5%, -10%) scale(1);
-    opacity: 1;
-  }
-  80% {
-    transform: translate(-10%, -45%) scale(1.05);
-    opacity: 0.95;
+  82% {
+    transform: translate3d(-10%, -26%, 0) scale(0.72);
+    opacity: 0.85;
   }
   100% {
-    transform: translate(-25%, -70%) scale(1);
-    opacity: 0.65;
+    transform: translate3d(-18%, -42%, 0) scale(0.68);
+    opacity: 0;
   }
 }
 
