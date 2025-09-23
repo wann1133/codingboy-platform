@@ -1,23 +1,12 @@
+import { randomUUID } from 'crypto';
 import { NextRequest, NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    
-    const {
-      name,
-      email,
-      phone,
-      service,
-      budget,
-      timeline,
-      message
-    } = body;
 
-    // Validate required fields
+    const { name, email, phone, service, budget, timeline, message } = body;
+
     if (!name || !email || !message) {
       return NextResponse.json(
         { error: 'Name, email, and message are required' },
@@ -25,33 +14,28 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Save inquiry to database
-    const inquiry = await prisma.inquiry.create({
-      data: {
-        name,
-        email,
-        phone: phone || null,
-        service: service || null,
-        budget: budget || null,
-        message: `Timeline: ${timeline || 'Not specified'}\n\n${message}`,
-        status: 'NEW'
-      }
+    const referenceId = randomUUID();
+
+    console.info('[contact] inquiry received', {
+      referenceId,
+      name,
+      email,
+      phone: phone ?? null,
+      service: service ?? null,
+      budget: budget ?? null,
+      timeline: timeline ?? 'Not specified',
     });
 
-    // Here you could add email notification logic
-    // For example, send email to admin or client
-
     return NextResponse.json(
-      { 
-        success: true, 
-        message: 'Inquiry submitted successfully',
-        inquiryId: inquiry.id
+      {
+        success: true,
+        message: 'Inquiry received. Tim kami akan menghubungi Anda segera.',
+        referenceId,
       },
       { status: 201 }
     );
-
   } catch (error) {
-    console.error('Error submitting inquiry:', error);
+    console.error('Error processing inquiry:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -61,7 +45,7 @@ export async function POST(request: NextRequest) {
 
 export async function GET() {
   return NextResponse.json(
-    { message: 'Contact API endpoint is working' },
+    { message: 'Contact API endpoint is active' },
     { status: 200 }
   );
 }

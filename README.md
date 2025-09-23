@@ -20,7 +20,7 @@ Marketplace platform untuk jasa pembuatan website yang menargetkan UKM dan Start
 - **Frontend**: Next.js 15 (App Router)
 - **Styling**: Tailwind CSS + Custom Glassmorphism
 - **Authentication**: Clerk
-- **Database**: PostgreSQL + Prisma ORM
+- **Data Layer**: Static content (no database required)
 - **Animations**: Framer Motion
 - **Icons**: Lucide React
 - **Forms**: React Hook Form + Zod
@@ -56,8 +56,6 @@ NEXT_PUBLIC_CLERK_SIGN_UP_URL=/sign-up
 NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL=/dashboard
 NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL=/dashboard
 
-# Database
-DATABASE_URL="postgresql://username:password@localhost:5432/codingboy_marketplace"
 
 # Payment Gateway (Midtrans)
 MIDTRANS_SERVER_KEY=your_midtrans_server_key
@@ -68,20 +66,7 @@ MIDTRANS_IS_PRODUCTION=false
 WHATSAPP_PHONE_NUMBER=+62881025741054
 ```
 
-### 4. Database Setup
-
-```bash
-# Generate Prisma Client
-npx prisma generate
-
-# Run Database Migration
-npx prisma db push
-
-# (Optional) Seed Database
-npx prisma db seed
-```
-
-### 5. Run Development Server
+### 4. Run Development Server
 
 ```bash
 npm run dev
@@ -103,9 +88,7 @@ src/
 │   ├── layout.tsx         # Root layout dengan Clerk
 │   └── page.tsx           # Homepage marketplace
 ├── middleware.ts          # Clerk middleware
-└── prisma/
-    └── schema.prisma      # Database schema
-```
+└──     └── ```
 
 ## 🎨 Design System
 
@@ -216,7 +199,6 @@ Distributed under the MIT License. See `LICENSE` for more information.
 - [Clerk](https://clerk.dev/) - Authentication
 - [Tailwind CSS](https://tailwindcss.com/) - Styling
 - [Framer Motion](https://www.framer.com/motion/) - Animations
-- [Prisma](https://prisma.io/) - Database ORM
 - [Lucide](https://lucide.dev/) - Icons
 
 ---

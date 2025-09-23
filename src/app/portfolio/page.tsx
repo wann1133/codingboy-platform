@@ -1,299 +1,340 @@
 'use client';
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowLeft, ExternalLink, Calendar, Tag, Star } from 'lucide-react';
+import { Calendar, ExternalLink, MessageCircle, Star, Tag } from 'lucide-react';
 import Link from 'next/link';
 
+import PrimaryNav from '@/components/PrimaryNav';
+
+const navLabels = {
+  tentang: 'Tentang',
+  portfolio: 'Portfolio',
+  blog: 'Blog',
+  contact: 'Kontak',
+} as const;
+
+const fadeUp = {
+  hidden: { opacity: 0, y: 32 },
+  show: { opacity: 1, y: 0, transition: { ease: 'easeOut', duration: 0.6 } },
+} as const;
+
+const categories = ['Semua', 'F&B', 'Fashion', 'Jasa', 'E-commerce', 'Creative', 'Health'] as const;
+
+type Category = (typeof categories)[number];
+
+type PortfolioItem = {
+  id: number;
+  title: string;
+  category: Category;
+  image: string;
+  description: string;
+  duration: string;
+  features: string[];
+  testimonial: string;
+  client: string;
+  rating: number;
+  url: string;
+};
+
+const portfolioItems: PortfolioItem[] = [
+  {
+    id: 1,
+    title: 'Warung Makan Sederhana',
+    category: 'F&B',
+    image: 'WM',
+    description: 'Website company profile dengan sistem pemesanan online untuk warung makan tradisional.',
+    duration: '5 hari',
+    features: ['Responsive Design', 'Online Ordering', 'Integrasi WhatsApp', 'SEO Optimized'],
+    testimonial: 'Pesanan online meningkat 300% dalam 2 bulan! Puas banget dengan hasilnya.',
+    client: 'Budi Santoso',
+    rating: 5,
+    url: '#',
+  },
+  {
+    id: 2,
+    title: 'Boutique Fashion Store',
+    category: 'Fashion',
+    image: 'BF',
+    description: 'E-commerce website untuk toko fashion dengan katalog produk dan sistem pembayaran.',
+    duration: '7 hari',
+    features: ['Product Catalog', 'Payment Gateway', 'Inventory Management', 'Mobile Ready'],
+    testimonial: 'Desainnya modern dan profesional. Customer jadi lebih percaya beli di toko kami.',
+    client: 'Sari Dewi',
+    rating: 5,
+    url: '#',
+  },
+  {
+    id: 3,
+    title: 'Konsultan Bisnis Pro',
+    category: 'Jasa',
+    image: 'KB',
+    description: 'Landing page profesional untuk jasa konsultasi bisnis lengkap dengan booking system.',
+    duration: '3 hari',
+    features: ['Booking System', 'Client Portal', 'Blog Integration', 'Lead Generation'],
+    testimonial: 'Pelayanan cepat dan hasilnya sangat membantu closing klien baru.',
+    client: 'Ahmad Rahman',
+    rating: 5,
+    url: '#',
+  },
+  {
+    id: 4,
+    title: 'Toko Online Elektronik',
+    category: 'E-commerce',
+    image: 'TE',
+    description: 'Platform e-commerce lengkap dengan fitur marketplace dan dukungan multi-vendor.',
+    duration: '14 hari',
+    features: ['Multi-vendor', 'Advanced Search', 'Review System', 'Analytics Dashboard'],
+    testimonial: 'Platform yang lengkap dan mudah dipakai oleh seller maupun admin.',
+    client: 'PT. Elektronik Jaya',
+    rating: 5,
+    url: '#',
+  },
+  {
+    id: 5,
+    title: 'Studio Fotografi',
+    category: 'Creative',
+    image: 'SF',
+    description: 'Portfolio website untuk studio fotografi dengan galeri interaktif dan testimoni klien.',
+    duration: '4 hari',
+    features: ['Interactive Gallery', 'Booking Calendar', 'Client Proofing', 'Social Integration'],
+    testimonial: 'Website yang sangat memukau dan berhasil menunjukkan value studio kami.',
+    client: 'Creative Studio',
+    rating: 5,
+    url: '#',
+  },
+  {
+    id: 6,
+    title: 'Fitness Center',
+    category: 'Health',
+    image: 'FC',
+    description: 'Website gym dengan sistem membership, jadwal kelas, dan profil trainer yang lengkap.',
+    duration: '6 hari',
+    features: ['Membership System', 'Class Scheduling', 'Trainer Profiles', 'Progress Tracking'],
+    testimonial: 'Member baru bertambah 150% setelah website launch! Sistemnya gampang dikelola.',
+    client: 'FitLife Gym',
+    rating: 5,
+    url: '#',
+  },
+  {
+    id: 7,
+    title: 'Kafe Modern',
+    category: 'F&B',
+    image: 'KM',
+    description: 'Website kafe dengan menu digital, reservasi meja, dan integrasi loyalty program.',
+    duration: '5 hari',
+    features: ['Digital Menu', 'Table Reservation', 'Event Booking', 'Loyalty Program'],
+    testimonial: 'Reservasi online bikin operasional jadi efisien dan pelanggan makin loyal.',
+    client: 'Modern Cafe',
+    rating: 5,
+    url: '#',
+  },
+  {
+    id: 8,
+    title: 'Brand Fashion Lokal',
+    category: 'Fashion',
+    image: 'FL',
+    description: 'E-commerce fashion brand dengan custom design tool dan panduan ukuran detail.',
+    duration: '8 hari',
+    features: ['Custom Design Tool', 'Size Guide', 'Wishlist', 'Social Commerce'],
+    testimonial: 'Penjualan online naik 400% dengan website yang user-friendly banget.',
+    client: 'Local Fashion Brand',
+    rating: 5,
+    url: '#',
+  },
+];
+
 export default function Portfolio() {
-  const [activeFilter, setActiveFilter] = useState('Semua');
+  const [activeFilter, setActiveFilter] = useState<Category>('Semua');
 
-  const categories = ['Semua', 'F&B', 'Fashion', 'Jasa', 'E-commerce', 'Creative', 'Health'];
-
-  const portfolioItems = [
-    {
-      id: 1,
-      title: "Warung Makan Sederhana",
-      category: "F&B",
-      image: "🍽️",
-      description: "Website company profile dengan sistem pemesanan online untuk warung makan tradisional",
-      duration: "5 hari",
-      features: ["Responsive Design", "Online Ordering", "WhatsApp Integration", "SEO Optimized"],
-      testimonial: "Pesanan online meningkat 300% dalam 2 bulan!",
-      client: "Budi Santoso",
-      rating: 5,
-      url: "#"
-    },
-    {
-      id: 2,
-      title: "Boutique Fashion Store",
-      category: "Fashion",
-      image: "👗",
-      description: "E-commerce website untuk toko fashion dengan katalog produk dan sistem pembayaran",
-      duration: "7 hari",
-      features: ["Product Catalog", "Payment Gateway", "Inventory Management", "Mobile App"],
-      testimonial: "Desainnya modern dan profesional. Customer jadi lebih percaya!",
-      client: "Sari Dewi",
-      rating: 5,
-      url: "#"
-    },
-    {
-      id: 3,
-      title: "Konsultan Bisnis Pro",
-      category: "Jasa",
-      image: "💼",
-      description: "Landing page profesional untuk jasa konsultasi bisnis dengan booking system",
-      duration: "3 hari",
-      features: ["Booking System", "Client Portal", "Blog Integration", "Lead Generation"],
-      testimonial: "Pelayanan cepat, hasil memuaskan. Highly recommended!",
-      client: "Ahmad Rahman",
-      rating: 5,
-      url: "#"
-    },
-    {
-      id: 4,
-      title: "Toko Online Elektronik",
-      category: "E-commerce",
-      image: "🛒",
-      description: "Platform e-commerce lengkap dengan fitur marketplace dan multi-vendor",
-      duration: "14 hari",
-      features: ["Multi-vendor", "Advanced Search", "Review System", "Analytics Dashboard"],
-      testimonial: "Platform yang sangat lengkap dan mudah digunakan!",
-      client: "PT. Elektronik Jaya",
-      rating: 5,
-      url: "#"
-    },
-    {
-      id: 5,
-      title: "Studio Fotografi",
-      category: "Creative",
-      image: "📸",
-      description: "Portfolio website untuk studio fotografi dengan galeri interaktif",
-      duration: "4 hari",
-      features: ["Interactive Gallery", "Booking Calendar", "Client Proofing", "Social Integration"],
-      testimonial: "Website yang sangat memukau dan fungsional!",
-      client: "Creative Studio",
-      rating: 5,
-      url: "#"
-    },
-    {
-      id: 6,
-      title: "Fitness Center",
-      category: "Health",
-      image: "💪",
-      description: "Website gym dengan sistem membership dan jadwal kelas online",
-      duration: "6 hari",
-      features: ["Membership System", "Class Scheduling", "Trainer Profiles", "Progress Tracking"],
-      testimonial: "Member baru bertambah 150% setelah website launch!",
-      client: "FitLife Gym",
-      rating: 5,
-      url: "#"
-    },
-    {
-      id: 7,
-      title: "Kafe Modern",
-      category: "F&B",
-      image: "☕",
-      description: "Website kafe dengan menu digital dan sistem reservasi meja",
-      duration: "5 hari",
-      features: ["Digital Menu", "Table Reservation", "Event Booking", "Loyalty Program"],
-      testimonial: "Reservasi online memudahkan customer dan meningkatkan efisiensi!",
-      client: "Modern Cafe",
-      rating: 5,
-      url: "#"
-    },
-    {
-      id: 8,
-      title: "Brand Fashion Lokal",
-      category: "Fashion",
-      image: "👕",
-      description: "E-commerce fashion brand dengan custom design dan size guide",
-      duration: "8 hari",
-      features: ["Custom Design Tool", "Size Guide", "Wishlist", "Social Commerce"],
-      testimonial: "Penjualan online naik 400% dengan website yang user-friendly!",
-      client: "Local Fashion Brand",
-      rating: 5,
-      url: "#"
-    }
-  ];
-
-  const filteredItems = activeFilter === 'Semua' 
-    ? portfolioItems 
-    : portfolioItems.filter(item => item.category === activeFilter);
+  const filteredItems = useMemo(() => {
+    if (activeFilter === 'Semua') return portfolioItems;
+    return portfolioItems.filter((item) => item.category === activeFilter);
+  }, [activeFilter]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
-      {/* Navigation */}
-      <nav className="bg-black/20 backdrop-blur-md border-b border-white/10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center">
-              <Link href="/" className="flex items-center text-gray-300 hover:text-white transition-colors mr-6">
-                <ArrowLeft className="w-5 h-5 mr-2" />
-                Kembali
-              </Link>
-              <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
-                Portfolio
-              </h1>
-            </div>
+    <div className="relative min-h-screen overflow-hidden bg-[#05070d] text-slate-100">
+      <div className="pointer-events-none absolute inset-0 -z-10">
+        <div className="absolute -top-36 left-1/2 h-[420px] w-[420px] -translate-x-1/2 rounded-full bg-[#6d6bff]/15 blur-3xl" />
+        <div className="absolute top-1/3 -left-40 h-[460px] w-[460px] rounded-full bg-[#a855f7]/10 blur-[220px]" />
+        <div className="absolute bottom-0 right-0 h-[360px] w-[360px] translate-x-1/4 translate-y-1/4 rounded-full bg-[#38bdf8]/10 blur-[200px]" />
+      </div>
+
+      <PrimaryNav labels={navLabels} />
+
+      <main className="pt-28 pb-24">
+        <motion.section
+          initial="hidden"
+          whileInView="show"
+          viewport={{ once: true, amount: 0.4 }}
+          variants={fadeUp}
+          className="relative mx-auto mb-16 max-w-5xl overflow-hidden rounded-3xl border border-[#1b253a] bg-gradient-to-br from-[#0f172a]/85 to-[#050a18]/90 p-12 text-center shadow-[0_32px_90px_rgba(5,10,25,0.55)]"
+        >
+          <div className="pointer-events-none absolute inset-0">
+            <div className="absolute left-1/2 top-0 h-32 w-[120%] -translate-x-1/2 bg-gradient-to-r from-transparent via-[#6d6bff]/20 to-transparent blur-2xl" />
+            <div className="absolute bottom-0 right-1/3 h-24 w-24 rounded-full bg-[#a855f7]/25 blur-3xl" />
           </div>
-        </div>
-      </nav>
-
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="text-center mb-12"
-        >
-          <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">
-            Portfolio Kami
-          </h2>
-          <p className="text-gray-300 text-lg max-w-2xl mx-auto">
-            Lihat hasil karya terbaik kami untuk berbagai industri. 
-            Lebih dari 100+ website telah kami buat dengan kepuasan klien 100%.
+          <span className="relative inline-flex items-center justify-center rounded-full border border-[#273149] bg-[#080f1f]/80 px-5 py-1 text-xs font-semibold uppercase tracking-[0.32em] text-[#8b5cf6]">
+            CodingBoy Showcase
+          </span>
+          <h1 className="relative mt-6 text-4xl font-bold text-white md:text-5xl">
+            Studi kasus digital yang bantu brand naik level
+          </h1>
+          <p className="relative mt-4 text-lg text-slate-300 md:text-xl">
+            Jelajahi projek unggulan kami di berbagai industri dengan perpaduan strategi, visual, dan performa bisnis.
           </p>
-        </motion.div>
+        </motion.section>
 
-        {/* Filter Categories */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className="flex flex-wrap justify-center gap-4 mb-12"
+          initial="hidden"
+          whileInView="show"
+          viewport={{ once: true, amount: 0.35 }}
+          variants={fadeUp}
+          className="mx-auto mb-16 max-w-4xl"
         >
-          {categories.map((category) => (
-            <button
-              key={category}
-              onClick={() => setActiveFilter(category)}
-              className={`px-6 py-3 rounded-lg font-medium transition-all ${
-                activeFilter === category
-                  ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white'
-                  : 'bg-white/10 border border-white/20 text-gray-300 hover:bg-white/20 hover:text-white'
-              }`}
-            >
-              {category}
-            </button>
-          ))}
+          <div className="flex flex-wrap justify-center gap-3">
+            {categories.map((category) => (
+              <button
+                key={category}
+                onClick={() => setActiveFilter(category)}
+                className={`rounded-full border px-5 py-2.5 text-sm font-medium transition-all ${
+                  activeFilter === category
+                    ? 'border-[#6d6bff] bg-gradient-to-r from-[#6d6bff] to-[#a855f7] text-white shadow-[0_18px_45px_rgba(104,97,255,0.45)]'
+                    : 'border-[#273149] bg-[#0b1324]/70 text-slate-300 hover:border-[#6d6bff] hover:text-white'
+                }`}
+              >
+                {category}
+              </button>
+            ))}
+          </div>
         </motion.div>
 
-        {/* Portfolio Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {filteredItems.map((item, index) => (
-            <motion.div
-              key={item.id}
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.6, delay: index * 0.1 }}
-              className="bg-white/5 backdrop-blur-md border border-white/10 rounded-xl overflow-hidden hover:bg-white/10 transition-all group"
-            >
-              {/* Project Image */}
-              <div className="aspect-video bg-gradient-to-br from-blue-600/20 to-purple-600/20 flex items-center justify-center text-6xl relative overflow-hidden">
-                {item.image}
-                <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                  <button className="bg-white/20 backdrop-blur-md border border-white/30 text-white p-3 rounded-full hover:bg-white/30 transition-all">
-                    <ExternalLink className="w-6 h-6" />
-                  </button>
-                </div>
-              </div>
-
-              {/* Project Info */}
-              <div className="p-6">
-                <div className="flex items-center justify-between mb-3">
-                  <h3 className="text-xl font-semibold text-white">{item.title}</h3>
-                  <span className="text-sm text-blue-400 bg-blue-400/10 px-2 py-1 rounded flex items-center gap-1">
-                    <Tag className="w-3 h-3" />
-                    {item.category}
-                  </span>
-                </div>
-
-                <p className="text-gray-300 text-sm mb-4 line-clamp-2">
-                  {item.description}
-                </p>
-
-                {/* Features */}
-                <div className="flex flex-wrap gap-2 mb-4">
-                  {item.features.slice(0, 3).map((feature, idx) => (
-                    <span
-                      key={idx}
-                      className="text-xs bg-white/10 text-gray-300 px-2 py-1 rounded"
+        <motion.section
+          initial="hidden"
+          whileInView="show"
+          viewport={{ once: true, amount: 0.35 }}
+          variants={fadeUp}
+          className="mx-auto max-w-6xl"
+        >
+          <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
+            {filteredItems.map((item, index) => (
+              <motion.div
+                key={item.id}
+                initial={{ opacity: 0, y: 28 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, amount: 0.5 }}
+                transition={{ delay: index * 0.06, duration: 0.55, ease: 'easeOut' }}
+                className="group flex h-full flex-col overflow-hidden rounded-3xl border border-[#1f2b42] bg-[#080f1f]/80 shadow-[0_20px_55px_rgba(5,10,25,0.45)] transition-all hover:border-[#6d6bff]"
+              >
+                <div className="relative flex aspect-video items-center justify-center overflow-hidden">
+                  <div className="absolute inset-0 bg-gradient-to-br from-[#6d6bff]/15 via-transparent to-[#a855f7]/20" />
+                  <span className="relative text-5xl font-semibold text-white/70">{item.image}</span>
+                  <div className="absolute inset-0 flex items-center justify-center bg-[#050a18]/80 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+                    <a
+                      href={item.url}
+                      className="inline-flex items-center gap-2 rounded-full border border-[#273149] bg-[#0b1324]/80 px-4 py-2 text-sm font-medium text-slate-200 transition-colors hover:border-[#6d6bff] hover:text-white"
                     >
-                      {feature}
-                    </span>
-                  ))}
-                  {item.features.length > 3 && (
-                    <span className="text-xs bg-white/10 text-gray-300 px-2 py-1 rounded">
-                      +{item.features.length - 3} lainnya
-                    </span>
-                  )}
-                </div>
-
-                {/* Duration */}
-                <div className="flex items-center text-gray-400 text-sm mb-4">
-                  <Calendar className="w-4 h-4 mr-2" />
-                  Selesai dalam {item.duration}
-                </div>
-
-                {/* Testimonial */}
-                <div className="bg-white/5 border border-white/10 rounded-lg p-3 mb-4">
-                  <div className="flex items-center mb-2">
-                    <div className="flex">
-                      {[...Array(item.rating)].map((_, i) => (
-                        <Star key={i} className="w-4 h-4 text-yellow-400 fill-current" />
-                      ))}
-                    </div>
-                    <span className="text-gray-400 text-sm ml-2">- {item.client}</span>
+                      <ExternalLink className="h-4 w-4" />
+                      Lihat proyek
+                    </a>
                   </div>
-                  <p className="text-gray-300 text-sm italic">"{item.testimonial}"</p>
                 </div>
 
-                {/* Action Button */}
-                <button className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white py-3 px-4 rounded-lg font-medium transition-all flex items-center justify-center gap-2">
-                  <ExternalLink className="w-4 h-4" />
-                  Lihat Detail
-                </button>
-              </div>
-            </motion.div>
-          ))}
-        </div>
+                <div className="flex flex-1 flex-col gap-5 p-6">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-xl font-semibold text-white">{item.title}</h3>
+                    <span className="inline-flex items-center gap-1 rounded-full border border-[#273149] bg-[#0b1324]/70 px-2.5 py-1 text-xs font-medium uppercase tracking-[0.2em] text-[#8b5cf6]">
+                      <Tag className="h-3.5 w-3.5" />
+                      {item.category}
+                    </span>
+                  </div>
+                  <p className="text-sm text-slate-300">{item.description}</p>
 
-        {/* CTA Section */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.8 }}
-          className="text-center mt-16"
+                  <div className="flex flex-wrap gap-2">
+                    {item.features.slice(0, 3).map((feature) => (
+                      <span
+                        key={feature}
+                        className="rounded-full border border-[#273149] bg-[#0b1324]/60 px-3 py-1 text-xs text-slate-300"
+                      >
+                        {feature}
+                      </span>
+                    ))}
+                    {item.features.length > 3 && (
+                      <span className="rounded-full border border-dashed border-[#273149] px-3 py-1 text-xs text-slate-400">
+                        +{item.features.length - 3} fitur lainnya
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="grid gap-3">
+                    <span className="flex items-center text-sm text-slate-400">
+                      <Calendar className="mr-2 h-4 w-4" />
+                      Selesai dalam {item.duration}
+                    </span>
+                    <div className="rounded-2xl border border-[#273149] bg-[#0b1324]/60 p-4">
+                      <div className="flex items-center gap-2">
+                        <div className="flex text-[#facc15]">
+                          {Array.from({ length: item.rating }).map((_, idx) => (
+                            <Star key={idx} className="h-4 w-4 fill-current" />
+                          ))}
+                        </div>
+                        <span className="text-sm text-slate-400">{item.client}</span>
+                      </div>
+                      <p className="mt-2 text-sm text-slate-300">"{item.testimonial}"</p>
+                    </div>
+                  </div>
+
+                  <div className="mt-auto">
+                    <a
+                      href={item.url}
+                      className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-gradient-to-r from-[#6d6bff] to-[#a855f7] px-6 py-3 text-sm font-semibold text-white transition-all hover:shadow-[0_18px_45px_rgba(104,97,255,0.45)]"
+                    >
+                      <ExternalLink className="h-4 w-4" />
+                      Detail proyek
+                    </a>
+                  </div>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </motion.section>
+
+        <motion.section
+          initial="hidden"
+          whileInView="show"
+          viewport={{ once: true, amount: 0.35 }}
+          variants={fadeUp}
+          className="mx-auto mt-20 max-w-5xl text-center"
         >
-          <div className="bg-gradient-to-r from-blue-600/20 to-purple-600/20 backdrop-blur-md border border-white/10 rounded-2xl p-12 max-w-4xl mx-auto">
-            <h3 className="text-3xl font-bold text-white mb-4">
-              Siap Membuat Website Seperti Ini?
-            </h3>
-            <p className="text-gray-300 text-lg mb-8">
-              Bergabunglah dengan 100+ klien yang telah mempercayakan website mereka kepada kami
+          <div className="relative overflow-hidden rounded-3xl border border-[#1b253a] bg-gradient-to-br from-[#0f172a]/85 to-[#050a18]/90 p-12 shadow-[0_32px_90px_rgba(5,10,25,0.55)]">
+            <div className="pointer-events-none absolute inset-0">
+              <div className="absolute left-1/2 top-0 h-32 w-[120%] -translate-x-1/2 bg-gradient-to-r from-transparent via-[#6d6bff]/15 to-transparent blur-2xl" />
+              <div className="absolute bottom-0 left-1/4 h-24 w-24 rounded-full bg-[#34d399]/20 blur-3xl" />
+            </div>
+            <h2 className="relative text-3xl font-semibold text-white md:text-4xl">Siap bikin versi terbaik dari brand kamu?</h2>
+            <p className="relative mt-4 text-lg text-slate-300">
+              Konsultasikan kebutuhan website kamu dan dapatkan rekomendasi paket yang pas plus breakdown proses produksi.
             </p>
-            
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <div className="relative mt-8 flex flex-col gap-4 sm:flex-row sm:justify-center">
               <a
-                href={`https://wa.me/62881025741054?text=${encodeURIComponent(
-                  "Halo CodingBoy! Saya tertarik membuat website setelah melihat portfolio Anda. Bisa konsultasi gratis?"
-                )}`}
+                href="https://wa.me/6281532797240?text=Halo%20CodingBoy!%20Saya%20tertarik%20dengan%20portfolio%20Anda%20dan%20ingin%20diskusi%20proyek."
                 target="_blank"
                 rel="noopener noreferrer"
-                className="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white px-8 py-4 rounded-lg text-lg font-medium transition-all inline-flex items-center justify-center gap-2"
+                className="inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-[#6d6bff] to-[#a855f7] px-7 py-3 text-sm font-semibold text-white shadow-[0_18px_45px_rgba(104,97,255,0.45)] transition-all hover:shadow-[0_22px_55px_rgba(104,97,255,0.55)]"
               >
-                💬 Konsultasi Gratis
+                <MessageCircle className="h-4 w-4" />
+                Konsultasi Gratis
               </a>
               <Link
                 href="/#paket"
-                className="bg-white/10 backdrop-blur-md border border-white/20 text-white hover:bg-white/20 px-8 py-4 rounded-lg text-lg font-medium transition-all"
+                className="inline-flex items-center justify-center rounded-full border border-[#273149] bg-[#0b1324]/70 px-7 py-3 text-sm font-semibold text-slate-200 transition-all hover:border-[#6d6bff] hover:text-white"
               >
                 Lihat Paket Harga
               </Link>
             </div>
           </div>
-        </motion.div>
-      </div>
+        </motion.section>
+      </main>
     </div>
   );
 }

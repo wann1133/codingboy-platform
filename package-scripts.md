@@ -6,7 +6,6 @@ Pastikan Anda sudah menginstall:
 
 - Node.js (v18 atau lebih baru)
 - npm atau yarn
-- PostgreSQL database
 - Git
 
 ## 🛠 Setup Development
@@ -32,8 +31,6 @@ NEXT_PUBLIC_CLERK_SIGN_UP_URL=/sign-up
 NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL=/dashboard
 NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL=/dashboard
 
-# Database PostgreSQL
-DATABASE_URL="postgresql://username:password@localhost:5432/codingboy_marketplace"
 
 # Payment Gateway Midtrans (Optional)
 MIDTRANS_SERVER_KEY=your_midtrans_server_key
@@ -44,17 +41,10 @@ MIDTRANS_IS_PRODUCTION=false
 WHATSAPP_PHONE_NUMBER=+62881025741054
 ```
 
-### 3. Setup Database
+### 3. Jalankan Development
 
 ```bash
-# Generate Prisma Client
-npx prisma generate
-
-# Push schema ke database
-npx prisma db push
-
-# (Optional) Lihat database di browser
-npx prisma studio
+npm run dev
 ```
 
 ### 4. Run Development Server
@@ -109,18 +99,16 @@ Website akan berjalan di: http://localhost:3000
 - Company values
 - Why choose us section
 
-### ✅ Database Schema
+### dY"? UI/UX Design
 
-- User management
-- Service packages
-- Project tracking
-- Portfolio showcase
-- Testimonials
-- Blog posts
-- Inquiries
-- Payments
+- Glassmorphism dark theme
+- Mobile-first responsive
+- Smooth animations dengan Framer Motion
+- Custom scrollbar
+- Hover effects
+- Loading states
 
-### ✅ UI/UX Design
+
 
 - Glassmorphism dark theme
 - Mobile-first responsive
@@ -206,13 +194,13 @@ npm start
 - Check API keys dari Clerk dashboard
 - Restart development server
 
-### Error: Database connection
-
-- Pastikan PostgreSQL running
-- Check DATABASE_URL format
-- Run `npx prisma db push` lagi
-
 ### Error: Module not found
+
+- Jalankan npm install lagi
+- Hapus folder node_modules lalu install ulang
+- Periksa ulang path import
+
+
 
 - Run `npm install` lagi
 - Clear node_modules dan reinstall
@@ -234,7 +222,6 @@ Fitur yang bisa ditambahkan:
 ## 💡 Tips Development
 
 1. **Hot Reload**: Perubahan akan otomatis reload
-2. **Database Changes**: Setelah edit schema, run `npx prisma db push`
 3. **Styling**: Gunakan Tailwind classes untuk consistency
 4. **Components**: Buat reusable components di folder `components/`
 5. **API Routes**: Tambahkan di folder `app/api/` untuk backend logic

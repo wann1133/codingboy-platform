@@ -232,7 +232,7 @@ export default function Home() {
               onMouseLeave={scheduleClosePortfolio}
             >
               <div className="ml-10 flex items-center space-x-4">
-                <a href="#tentang" className="text-white hover:text-[#6d6bff] px-3 py-2 rounded-md text-sm font-medium transition-colors">
+                <a href="tentang" className="text-white hover:text-[#6d6bff] px-3 py-2 rounded-md text-sm font-medium transition-colors">
                   {L.nav.about}
                 </a>
                 <button
@@ -1011,7 +1011,7 @@ export default function Home() {
             <div>
               <h4 className="text-sm font-semibold tracking-[0.2em] text-white uppercase mb-4">Perusahaan</h4>
               <ul className="space-y-2 text-slate-400 text-sm">
-                <li><a href="#tentang" className="hover:text-[#6d6bff] transition-colors">Tentang Kami</a></li>
+                <li><a href="tentang" className="hover:text-[#6d6bff] transition-colors">Tentang Kami</a></li>
                 <li><a href="#portfolio" className="hover:text-[#6d6bff] transition-colors">Portfolio</a></li>
                 <li><a href="#" className="hover:text-[#6d6bff] transition-colors">Karir</a></li>
                 <li><a href="/kontak" className="hover:text-[#6d6bff] transition-colors">Kontak</a></li>
@@ -1020,7 +1020,7 @@ export default function Home() {
           </div>
           
           <div className="border-t border-[#171f33] mt-8 pt-8 text-center text-slate-500 text-xs tracking-[0.18em] uppercase">
-            <p>&copy; 2024 CodingBoy. All rights reserved. Made in Indonesia.</p>
+            <p>&copy; 2025 CodingBoy. All rights reserved. Made in Indonesia.</p>
           </div>
         </div>
       </footer>

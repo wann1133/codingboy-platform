@@ -58,22 +58,75 @@ CLERK_SECRET_KEY=sk_test_your_key
 # WhatsApp Number (Format: +62xxx)
 WHATSAPP_PHONE_NUMBER=+62881025741054
 
-# Database
-DATABASE_URL="postgresql://user:pass@localhost:5432/db"
 ```
 
-### 3. Setup Database
+### 3. Run Development
+
+Jalankan perintah npm run dev
+
+Website akan berjalan di: **http://localhost:3000**
+
+## 🎯 **Fitur Utama:**
+
+- **Floating Button** - Muncul di pojok kanan bawah setelah 2 detik
+- **Pulse Animation** - Efek berkedip untuk menarik perhatian
+- **Notification Badge** - Dot merah dengan animasi bounce
+- **Chat Form** - Pop-up form seperti live chat
+- **Quick Messages** - 5 template pesan cepat
+- **Custom Message** - User bisa ketik pesan sendiri
+- **WhatsApp Redirect** - Langsung ke WhatsApp dengan pesan pre-filled
+- **Tooltip** - "Ada yang bisa kami bantu?" muncul setelah 3 detik
+- **Online Status** - Indicator "Online" di samping button
+- **Mobile Responsive** - Optimized untuk mobile dan desktop
+
+### 🎨 **Design Features:**
+
+- **Glassmorphism Style** - Sesuai dengan theme website
+- **Smooth Animations** - Menggunakan Framer Motion
+- **Hover Effects** - Scale dan shadow effects
+- **CSS Classes** - Menggunakan class names sesuai permintaan:
+  - `chaty-outer-forms`
+  - `chaty-popup-whatsapp-form`
+  - `chaty-whatsapp-btn-form`
+  - `chaty-form-0`
+  - `pos-right`
+  - `active`
+
+### 📱 **Cara Kerja:**
+
+1. Button muncul setelah 2 detik page load
+2. User klik button → Chat form terbuka
+3. User bisa pilih quick message atau ketik sendiri
+4. Klik Send → Redirect ke WhatsApp dengan pesan
+5. Chat form otomatis tutup setelah redirect
+
+## 🛠 **Cara Menjalankan Project:**
+
+### 1. Install Dependencies
 
 ```bash
-npx prisma generate
-npx prisma db push
+npm install
 ```
 
-### 4. Run Development
+### 2. Setup Environment Variables
 
-```bash
+Buat file `.env.local`:
+
+```env
+# Clerk Authentication
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_your_key
+CLERK_SECRET_KEY=sk_test_your_key
+
+# WhatsApp Number (Format: +62xxx)
+WHATSAPP_PHONE_NUMBER=+62881025741054
+
+```
+
+### 3. Run Development
+
+``ash
 npm run dev
-```
+``
 
 Website akan berjalan di: **http://localhost:3000**
 
