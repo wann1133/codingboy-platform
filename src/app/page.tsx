@@ -1,9 +1,6 @@
 'use client';
-import { useEffect, useRef, useState } from 'react';
-import { AnimatePresence, motion } from 'framer-motion';
+import { motion } from 'framer-motion';
 import {
-  Code,
-  Smartphone,
   Zap,
   Shield,
   Star,
@@ -11,11 +8,8 @@ import {
   ArrowRight,
   MessageCircle,
   Globe,
-  Palette,
   ShoppingCart,
-  Users,
   Clock,
-  Award,
   Phone,
   Mail,
   MapPin,
@@ -24,10 +18,9 @@ import {
   BriefcaseBusiness,
   Camera,
   Dumbbell,
-  ChevronDown,
 } from 'lucide-react';
 
-import LanguageToggle from '@/components/LanguageToggle';
+import PrimaryNav from '@/components/PrimaryNav';
 import { useLanguage } from '@/components/LanguageContext';
 
 export default function Home() {
@@ -50,105 +43,12 @@ export default function Home() {
     },
   } as const;
   const L = t[(lang as 'id' | 'en') || 'id'];
-
-  const [openMega, setOpenMega] = useState<string | null>(null);
-  const navRef = useRef<HTMLDivElement | null>(null);
-  const hoverTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  const clearHoverTimeout = () => {
-    if (hoverTimeout.current) {
-      clearTimeout(hoverTimeout.current);
-      hoverTimeout.current = null;
-    }
-  };
-
-  useEffect(() => {
-    if (!openMega) return;
-
-    const handleDocumentClick = (event: MouseEvent) => {
-      if (!navRef.current?.contains(event.target as Node)) {
-        setOpenMega(null);
-      }
-    };
-
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        setOpenMega(null);
-      }
-    };
-
-    document.addEventListener('mousedown', handleDocumentClick);
-    document.addEventListener('keydown', handleKeyDown);
-
-    return () => {
-      document.removeEventListener('mousedown', handleDocumentClick);
-      document.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [openMega]);
-
-  useEffect(() => {
-    return () => {
-      clearHoverTimeout();
-    };
-  }, []);
-
-  const handleMegaToggle = (key: 'portfolio') => {
-    clearHoverTimeout();
-    setOpenMega((prev) => (prev === key ? null : key));
-  };
-
-  const openPortfolioHover = () => {
-    clearHoverTimeout();
-    setOpenMega('portfolio');
-  };
-
-  const scheduleClosePortfolio = () => {
-    clearHoverTimeout();
-    hoverTimeout.current = setTimeout(() => {
-      setOpenMega(null);
-    }, 180);
-  };
-
-  const isPortfolioOpen = openMega === 'portfolio';
-
-  const portfolioSolutionColumns = [
-    [
-      'Company Profile Premium',
-      'Landing Page Interaktif',
-      'Microsite Kampanye',
-      'Portal Edukasi & Kursus',
-    ],
-    [
-      'E-Commerce Showcase',
-      'Dashboard & Admin UI',
-      'Brand Storytelling Site',
-      'Product Design Case Study',
-    ],
-  ] as const;
-
-  const portfolioSpotlight = [
-    {
-      title: 'Rebranding Tech Startup',
-      category: 'UI/UX - Website Development',
-      description: 'Transformasi landing page SaaS dengan fokus pada konversi demo 3x lebih tinggi.',
-      icon: Globe,
-      accent: 'from-[#4f46e5] to-[#7c3aed]',
-    },
-    {
-      title: 'Marketplace UMKM Lokal',
-      category: 'E-Commerce - Product Strategy',
-      description: 'Desain katalog dan checkout ringan untuk mengangkat brand UKM ke ranah digital.',
-      icon: ShoppingCart,
-      accent: 'from-[#38bdf8] to-[#6366f1]',
-    },
-    {
-      title: 'Corporate Portfolio Suite',
-      category: 'Creative - Motion & Visual',
-      description: 'Presentasi interaktif dengan video hero dan animasi smooth untuk brand enterprise.',
-      icon: Palette,
-      accent: 'from-[#f97316] to-[#ec4899]',
-    },
-  ] as const;
+  const navLabels = {
+    tentang: L.nav.about,
+    portfolio: L.nav.portfolio,
+    blog: L.nav.blog,
+    contact: L.nav.contact,
+  } as const;
 
   const heroContainer = {
     hidden: { opacity: 0, y: 60 },
@@ -202,189 +102,9 @@ export default function Home() {
   return (
     <div className="min-h-screen text-slate-100">
       {/* Navigation */}
-      <nav className="fixed top-0 w-full z-50 bg-[#060912]/60 border-b border-[#10182b] shadow-[0_12px_40px_rgba(0,0,0,0.45)]">
-        <div ref={navRef} className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between py-4 sm:py-5">
-            <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="flex items-center">
-              <a href="/" aria-label="CodingBoy" className="flex items-center">
-                <div className="relative flex h-14 w-auto items-center sm:h-16">
-                  <img
-                    src="/logo.png"
-                    alt="CodingBoy"
-                    className="nav-logo-base h-full w-auto"
-                    loading="eager"
-                  />
-                  <img
-                    src="/orang jalan.png"
-                    alt=""
-                    aria-hidden="true"
-                    className="nav-logo-walker"
-                    loading="lazy"
-                  />
-                </div>
-                <span className="sr-only">CodingBoy</span>
-              </a>
-            </motion.div>
+      <PrimaryNav labels={navLabels} />
 
-            <div
-              className="relative hidden md:block"
-              onMouseEnter={clearHoverTimeout}
-              onMouseLeave={scheduleClosePortfolio}
-            >
-              <div className="ml-10 flex items-center space-x-4">
-                <a href="tentang" className="text-white hover:text-[#6d6bff] px-3 py-2 rounded-md text-sm font-medium transition-colors">
-                  {L.nav.about}
-                </a>
-                <button
-                  type="button"
-                  onClick={() => handleMegaToggle('portfolio')}
-                  onMouseEnter={openPortfolioHover}
-                  onFocus={openPortfolioHover}
-                  onMouseLeave={scheduleClosePortfolio}
-                  onBlur={scheduleClosePortfolio}
-                  aria-expanded={isPortfolioOpen}
-                  aria-controls="portfolio-mega"
-                  className={`relative flex items-center gap-1 rounded-md px-3 py-2 text-sm font-medium transition-colors ${
-                    isPortfolioOpen ? 'text-[#8b5cf6]' : 'text-white hover:text-[#6d6bff]'
-                  }`}
-                >
-                  <span>{L.nav.portfolio}</span>
-                  <ChevronDown
-                    className={`h-4 w-4 transition-transform duration-150 ${
-                      isPortfolioOpen ? 'rotate-180 text-[#8b5cf6]' : 'text-slate-300'
-                    }`}
-                  />
-                  {isPortfolioOpen && (
-                    <span className="absolute inset-x-2 -bottom-1 h-0.5 rounded-full bg-gradient-to-r from-[#6d6bff] via-[#8b5cf6] to-[#6d6bff]" />
-                  )}
-                </button>
-                <a href="#blog" className="text-white hover:text-[#6d6bff] px-3 py-2 rounded-md text-sm font-medium transition-colors">
-                  {L.nav.blog}
-                </a>
-                <a href="/kontak" className="text-white hover:text-[#6d6bff] px-3 py-2 rounded-md text-sm font-medium transition-colors">
-                  {L.nav.contact}
-                </a>
-              </div>
 
-              <AnimatePresence>
-                {isPortfolioOpen && (
-                  <motion.div
-                    key="portfolio-mega"
-                    id="portfolio-mega"
-                    initial={{ opacity: 0, y: 16, scale: 0.98 }}
-                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                    exit={{ opacity: 0, y: 16, scale: 0.98 }}
-                    transition={{ duration: 0.22, ease: 'easeOut' }}
-                    onMouseEnter={clearHoverTimeout}
-                    onMouseLeave={scheduleClosePortfolio}
-                    onFocusCapture={clearHoverTimeout}
-                    onBlurCapture={scheduleClosePortfolio}
-                    className="portfolio-mega absolute left-1/2 top-full z-40 mt-6 w-[min(860px,90vw)] -translate-x-1/2 rounded-3xl border border-[#1b253a] bg-[#030817]/95 p-8 shadow-[0_28px_80px_rgba(8,12,24,0.75)] backdrop-blur-xl"
-                    role="menu"
-                  >
-                    <div className="flex flex-col gap-8">
-                      <div className="flex flex-col gap-3">
-                        <span className="text-xs font-semibold uppercase tracking-[0.35em] text-[#6d6bff]">
-                          Portfolio Highlights
-                        </span>
-                        <div className="flex flex-wrap items-end justify-between gap-4">
-                          <h3 className="text-2xl font-semibold tracking-wide text-white">
-                            Kreasi terbaik kami dalam desain & pengembangan digital
-                          </h3>
-                          <a
-                            href="#portfolio"
-                            onClick={() => {
-                              clearHoverTimeout();
-                              setOpenMega(null);
-                            }}
-                            className="inline-flex items-center gap-2 rounded-full border border-[#273149] bg-[#0b1324]/60 px-4 py-2 text-xs font-semibold uppercase tracking-[0.28em] text-slate-200 hover:border-[#6d6bff] hover:text-white"
-                          >
-                            Lihat Portfolio
-                            <ArrowRight className="h-3.5 w-3.5" />
-                          </a>
-                        </div>
-                        <p className="max-w-3xl text-sm text-slate-300">
-                          Jelajahi studi kasus yang menampilkan perpaduan riset, visual storytelling, dan performa bisnis.
-                        </p>
-                      </div>
-
-                      <div className="grid gap-8 md:grid-cols-[1.45fr,1fr]">
-                        <div className="grid gap-6 sm:grid-cols-2">
-                          {portfolioSolutionColumns.map((column, colIndex) => (
-                            <ul key={colIndex} className="space-y-3">
-                              {column.map((item) => (
-                                <li key={item} className="group flex items-center gap-3 text-sm text-slate-200">
-                                  <span className="h-1.5 w-1.5 rounded-full bg-[#6d6bff] transition-transform group-hover:scale-125" />
-                                  <span className="leading-relaxed group-hover:text-white">{item}</span>
-                                </li>
-                              ))}
-                            </ul>
-                          ))}
-                        </div>
-
-                        <div className="flex flex-col gap-4">
-                          {portfolioSpotlight.map(({ title, description, category, icon: Icon, accent }) => (
-                            <div
-                              key={title}
-                              className="flex items-start gap-4 rounded-2xl border border-[#1f2b42] bg-gradient-to-br from-[#0f172a]/80 to-[#050a18]/80 p-4 shadow-[0_14px_35px_rgba(4,10,24,0.45)]"
-                            >
-                              <div className={`flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-gradient-to-br ${accent}`}>
-                                <Icon className="h-6 w-6 text-white" />
-                              </div>
-                              <div className="space-y-1">
-                                <p className="text-xs font-medium uppercase tracking-[0.24em] text-[#8b5cf6]">{category}</p>
-                                <h4 className="text-base font-semibold text-white">{title}</h4>
-                                <p className="text-sm text-slate-300">{description}</p>
-                              </div>
-                            </div>
-                          ))}
-                          <a
-                            href="/portfolio"
-                            onClick={() => {
-                              clearHoverTimeout();
-                              setOpenMega(null);
-                            }}
-                            className="group inline-flex items-center justify-between rounded-2xl border border-dashed border-[#273149] bg-[#080f1f]/60 px-5 py-3 text-sm font-medium text-slate-200 hover:border-[#6d6bff] hover:text-white"
-                          >
-                            <span>Butuh versi kustom untuk brand Anda?</span>
-                            <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-                          </a>
-                        </div>
-                      </div>
-
-                      <div className="flex flex-col items-start gap-3 rounded-2xl border border-[#1b253a] bg-[#040a1a]/80 p-6 sm:flex-row sm:items-center sm:justify-between">
-                        <div>
-                          <p className="text-sm font-semibold uppercase tracking-[0.28em] text-slate-300">Siap diskusi?</p>
-                          <p className="max-w-xl text-sm text-slate-400">
-                            Tim kreatif kami siap bantu audit brand dan merancang website yang mencuri perhatian.
-                          </p>
-                        </div>
-                        <a
-                          href="https://wa.me/62881025741054"
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          onClick={() => {
-                            clearHoverTimeout();
-                            setOpenMega(null);
-                          }}
-                          className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-[#6d6bff] to-[#a855f7] px-6 py-3 text-sm font-semibold text-white shadow-[0_18px_45px_rgba(104,97,255,0.45)] hover:shadow-[0_22px_55px_rgba(104,97,255,0.55)]"
-                        >
-                          Konsultasi Project
-                          <ArrowRight className="h-4 w-4" />
-                        </a>
-                      </div>
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-
-            <div className="flex items-center space-x-4">
-              <LanguageToggle />
-            </div>
-          </div>
-        </div>
-      </nav>
 
       {/* Hero Section */}
       <section id="beranda" className="relative">

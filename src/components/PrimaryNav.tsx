@@ -1,10 +1,9 @@
-﻿"use client";
+"use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
-import gsap from "gsap";
 import {
   ArrowRight,
   ChevronDown,
@@ -80,16 +79,8 @@ const NAV_LINKS: Array<{ id: NavItemId; href: string }> = [
 
 export default function PrimaryNav({ labels }: PrimaryNavProps) {
   const pathname = usePathname();
-  const navRef = useRef<HTMLDivElement | null>(null);
-  const navListRef = useRef<HTMLDivElement | null>(null);
-  const walkerRef = useRef<HTMLImageElement | null>(null);
+  const navRef = useRef<HTMLElement | null>(null);
   const hoverTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const navItemRefs = useRef<Record<NavItemId, HTMLAnchorElement | null>>({
-    tentang: null,
-    portfolio: null,
-    blog: null,
-    contact: null,
-  });
 
   const [openMega, setOpenMega] = useState(false);
   const [hoveredId, setHoveredId] = useState<NavItemId | null>(null);
@@ -102,11 +93,6 @@ export default function PrimaryNav({ labels }: PrimaryNavProps) {
     if (pathname.startsWith("/tentang")) return "tentang";
     return null;
   }, [openMega, pathname]);
-
-  useEffect(() => {
-    setOpenMega(false);
-    setHoveredId(null);
-  }, [pathname]);
 
   const clearHoverTimeout = () => {
     if (hoverTimeout.current) {
@@ -147,150 +133,100 @@ export default function PrimaryNav({ labels }: PrimaryNavProps) {
   }, [openMega]);
 
   useEffect(() => {
-    const walker = walkerRef.current;
-    if (!walker) return;
-
-    gsap.set(walker, { autoAlpha: 0, x: 0 });
-    const tween = gsap.to(walker, {
-      y: "-=6",
-      duration: 1.4,
-      ease: "sine.inOut",
-      repeat: -1,
-      yoyo: true,
-    });
-
-    return () => {
-      tween.kill();
-    };
-  }, []);
-
-  const moveWalker = useCallback((targetId: NavItemId | null) => {
-    const walker = walkerRef.current;
-    const container = navListRef.current;
-    if (!walker || !container) return;
-
-    if (!targetId) {
-      gsap.to(walker, { autoAlpha: 0, duration: 0.3, ease: "power2.out" });
-      return;
-    }
-
-    const target = navItemRefs.current[targetId];
-    if (!target) {
-      gsap.to(walker, { autoAlpha: 0, duration: 0.3, ease: "power2.out" });
-      return;
-    }
-
-    const targetRect = target.getBoundingClientRect();
-    const containerRect = container.getBoundingClientRect();
-    const x = targetRect.left + targetRect.width / 2 - containerRect.left;
-
-    gsap.to(walker, {
-      x,
-      autoAlpha: 1,
-      duration: 0.45,
-      ease: "power3.out",
-    });
-  }, []);
-
-  const labelsKey = useMemo(() => Object.values(labels).join("|"), [labels]);
-
-  useEffect(() => {
-    moveWalker(hoveredId ?? activeId);
-  }, [activeId, hoveredId, moveWalker, labelsKey]);
-
-  useEffect(() => {
-    const handleResize = () => moveWalker(hoveredId ?? activeId);
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, [activeId, hoveredId, moveWalker]);
+    setOpenMega(false);
+    setHoveredId(null);
+  }, [pathname]);
 
   return (
     <nav
       ref={navRef}
-      className="fixed top-0 z-50 w-full border-b border-[#10182b] bg-[#060912]/70 shadow-[0_12px_40px_rgba(0,0,0,0.45)] backdrop-blur-md"
+      className="fixed top-0 z-50 w-full border-b border-white/10 bg-[#050915]/80 backdrop-blur-xl"
     >
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between py-4 sm:py-5">
+        <div className="flex items-center justify-between gap-4 py-4 sm:py-5">
           <Link href="/" aria-label="CodingBoy" className="flex items-center">
-            <div className="relative flex h-14 w-auto items-center overflow-hidden sm:h-16">
-              <img src="/logo.png" alt="CodingBoy" className="nav-logo-base h-full w-auto" loading="eager" />
-              <img src="/orang jalan.png" alt="" aria-hidden="true" className="nav-logo-walker" loading="lazy" />
+            <div className="flex h-12 w-auto items-center overflow-hidden sm:h-14">
+              <img
+                src="/logo.png"
+                alt="CodingBoy"
+                className="h-full w-auto"
+                loading="eager"
+              />
             </div>
             <span className="sr-only">CodingBoy</span>
           </Link>
 
-          <div
-            ref={navListRef}
-            className="relative hidden items-center gap-4 text-sm font-medium text-slate-200 md:flex"
-          >
-            <motion.img
-              ref={walkerRef}
-              src="/orang jalan.png"
-              alt=""
-              aria-hidden="true"
-              className="pointer-events-none absolute -top-12 left-0 h-10 w-auto opacity-0 drop-shadow-[0_12px_30px_rgba(104,97,255,0.55)]"
-            />
-            {NAV_LINKS.map(({ id, href }) => {
-              const label = labels[id];
-              const isPortfolio = id === "portfolio";
-              return (
-                <Link
-                  key={id}
-                  href={href}
-                  ref={(el) => {
-                    navItemRefs.current[id] = el;
-                  }}
-                  onClick={() => {
-                    if (isPortfolio) {
-                      setOpenMega(false);
-                    }
-                  }}
-                  onMouseEnter={() => {
-                    setHoveredId(id);
-                    if (isPortfolio) {
-                      clearHoverTimeout();
-                      setOpenMega(true);
-                    }
-                  }}
-                  onMouseLeave={() => {
-                    setHoveredId(null);
-                    if (isPortfolio) {
-                      scheduleMegaClose();
-                    }
-                  }}
-                  onFocus={() => {
-                    setHoveredId(id);
-                    if (isPortfolio) {
-                      clearHoverTimeout();
-                      setOpenMega(true);
-                    }
-                  }}
-                  onBlur={() => {
-                    setHoveredId(null);
-                    if (isPortfolio) {
-                      scheduleMegaClose();
-                    }
-                  }}
-                  className={`relative rounded-md px-3 py-2 transition-colors ${
-                    (hoveredId ?? activeId) === id ? "text-white" : "hover:text-white"
-                  }`}
-                >
-                  <span className="relative z-10 flex items-center gap-1">
-                    {label}
-                    {isPortfolio && (
-                      <ChevronDown
-                        className={`h-4 w-4 transition-transform ${
-                          openMega || hoveredId === id ? "rotate-180" : ""
-                        }`}
+          <div className="relative hidden items-center gap-4 md:flex">
+            <div className="flex items-center gap-1 rounded-full border border-white/10 bg-white/5 px-1 py-1">
+              {NAV_LINKS.map(({ id, href }) => {
+                const label = labels[id];
+                const isPortfolio = id === "portfolio";
+                const isActive = (hoveredId ?? activeId) === id;
+
+                return (
+                  <Link
+                    key={id}
+                    href={href}
+                    onMouseEnter={() => {
+                      setHoveredId(id);
+                      if (isPortfolio) {
+                        clearHoverTimeout();
+                        setOpenMega(true);
+                      }
+                    }}
+                    onMouseLeave={() => {
+                      setHoveredId(null);
+                      if (isPortfolio) {
+                        scheduleMegaClose();
+                      }
+                    }}
+                    onFocus={() => {
+                      setHoveredId(id);
+                      if (isPortfolio) {
+                        clearHoverTimeout();
+                        setOpenMega(true);
+                      }
+                    }}
+                    onBlur={() => {
+                      setHoveredId(null);
+                      if (isPortfolio) {
+                        scheduleMegaClose();
+                      }
+                    }}
+                    onClick={() => {
+                      if (isPortfolio) {
+                        setOpenMega(false);
+                      }
+                    }}
+                    aria-haspopup={isPortfolio ? "true" : undefined}
+                    aria-expanded={isPortfolio ? openMega : undefined}
+                    className={`relative isolate inline-flex items-center gap-1 overflow-hidden rounded-full px-4 py-2 text-sm font-medium transition-all ${
+                      isActive
+                        ? "text-white"
+                        : "text-slate-200 hover:text-white hover:bg-white/10"
+                    }`}
+                  >
+                    {isActive && (
+                      <motion.span
+                        layoutId="nav-active-pill"
+                        className="absolute inset-0 -z-10 rounded-full bg-gradient-to-r from-[#6d6bff] via-[#8b5cf6] to-[#6d6bff] opacity-90 shadow-[0_18px_45px_rgba(104,97,255,0.35)]"
+                        transition={{ type: "spring", stiffness: 400, damping: 30 }}
                       />
                     )}
-                  </span>
-                  {(hoveredId ?? activeId) === id && (
-                    <span className="absolute inset-x-2 -bottom-1 h-0.5 rounded-full bg-gradient-to-r from-[#6d6bff] via-[#8b5cf6] to-[#6d6bff]" />
-                  )}
-                </Link>
-              );
-            })}
+                    <span className="flex items-center gap-1">
+                      {label}
+                      {isPortfolio && (
+                        <ChevronDown
+                          className={`h-4 w-4 transition-transform ${
+                            openMega || hoveredId === id ? "rotate-180" : ""
+                          }`}
+                        />
+                      )}
+                    </span>
+                  </Link>
+                );
+              })}
+            </div>
 
             <AnimatePresence>
               {openMega && (
@@ -316,7 +252,7 @@ export default function PrimaryNav({ labels }: PrimaryNavProps) {
                         <Link
                           href="/portfolio"
                           onClick={() => setOpenMega(false)}
-                          className="inline-flex items-center gap-2 rounded-full border border-[#273149] bg-[#0b1324]/60 px-4 py-2 text-xs font-semibold uppercase tracking-[0.28em] text-slate-200 transition-colors hover:border-[#6d6bff] hover:text-white"
+                          className="inline-flex items-center gap-2 rounded-full border border-[#273149] bg-[#0b1324]/70 px-4 py-2 text-xs font-semibold uppercase tracking-[0.28em] text-slate-200 transition-colors hover:border-[#6d6bff] hover:text-white"
                         >
                           Lihat Portfolio
                           <ArrowRight className="h-3.5 w-3.5" />
@@ -415,5 +351,3 @@ export default function PrimaryNav({ labels }: PrimaryNavProps) {
     </nav>
   );
 }
-
-

@@ -1,157 +1,211 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
 import { ArrowRight, Calendar, Eye, Search, Tag } from 'lucide-react';
 
 import PrimaryNav from '@/components/PrimaryNav';
-
-const navLabels = {
-  tentang: 'Tentang',
-  portfolio: 'Portfolio',
-  blog: 'Blog',
-  contact: 'Kontak',
-} as const;
+import { useLanguage } from '@/components/LanguageContext';
+import { defaultBlogEntries } from '@/lib/default-content';
 
 const fadeUp = {
   hidden: { opacity: 0, y: 32 },
   show: { opacity: 1, y: 0, transition: { ease: 'easeOut', duration: 0.6 } },
 } as const;
 
-const categories = ['Semua', 'Tutorial Web', 'Digital Marketing', 'Bisnis Online', 'Tren Design', 'Studi Kasus'] as const;
-
-type Category = (typeof categories)[number];
+const defaultCategories = [
+  'Semua',
+  'Tutorial Web',
+  'Digital Marketing',
+  'Bisnis Online',
+  'Tren Design',
+  'Studi Kasus',
+] as const;
 
 type BlogPost = {
-  id: number;
+  id: string;
   title: string;
   slug: string;
-  excerpt: string;
+  excerpt: string | null;
   content: string;
-  category: Exclude<Category, 'Semua'>;
+  category: string;
   tags: string[];
-  image: string;
-  published: boolean;
+  image: string | null;
   featured: boolean;
   views: number;
-  publishedAt: string;
-  readTime: string;
+  publishedAt: string | null;
+  readTime: string | null;
 };
 
-const blogPosts: BlogPost[] = [
-  {
-    id: 1,
-    title: 'Cara Memilih Jasa Pembuatan Website Terpercaya',
-    slug: 'cara-memilih-jasa-pembuatan-website-terpercaya',
-    excerpt: 'Tips memilih jasa pembuatan website yang tepat untuk bisnis Anda. Pelajari kriteria penting yang harus diperhatikan.',
-    content: 'Memilih jasa pembuatan website yang tepat adalah keputusan penting untuk bisnis Anda...',
-    category: 'Tutorial Web',
-    tags: ['website', 'bisnis', 'tips', 'pemilihan'],
-    image: 'ART01',
-    published: true,
-    featured: true,
-    views: 1250,
-    publishedAt: '2024-01-15',
-    readTime: '5 menit',
-  },
-  {
-    id: 2,
-    title: 'Website vs Media Sosial: Mana yang Lebih Penting untuk Bisnis?',
-    slug: 'website-vs-media-sosial-mana-yang-lebih-penting',
-    excerpt: 'Perbandingan antara website dan media sosial untuk strategi digital marketing yang efektif.',
-    content: 'Dalam era digital ini, banyak bisnis yang bingung memilih antara website atau media sosial...',
-    category: 'Digital Marketing',
-    tags: ['website', 'social media', 'digital marketing', 'strategi'],
-    image: 'ART02',
-    published: true,
-    featured: true,
-    views: 980,
-    publishedAt: '2024-01-12',
-    readTime: '7 menit',
-  },
-  {
-    id: 3,
-    title: 'Berapa Biaya Pembuatan Website untuk UMKM?',
-    slug: 'berapa-biaya-pembuatan-website-untuk-umkm',
-    excerpt: 'Panduan lengkap estimasi biaya pembuatan website untuk UMKM dengan berbagai pilihan paket.',
-    content: 'Salah satu pertanyaan yang paling sering ditanyakan oleh pemilik UMKM adalah berapa biaya...',
-    category: 'Bisnis Online',
-    tags: ['biaya', 'UMKM', 'website', 'budget'],
-    image: 'ART03',
-    published: true,
-    featured: false,
-    views: 1500,
-    publishedAt: '2024-01-10',
-    readTime: '6 menit',
-  },
-  {
-    id: 4,
-    title: '10 Tren Design Website 2024 yang Wajib Anda Ketahui',
-    slug: '10-tren-design-website-2024',
-    excerpt: 'Tren design website terbaru yang akan mendominasi tahun 2024. Dari glassmorphism hingga dark mode.',
-    content: 'Design website terus berkembang setiap tahunnya. Berikut adalah 10 tren design yang akan populer...',
-    category: 'Tren Design',
-    tags: ['design', 'tren', '2024', 'UI/UX'],
-    image: 'ART04',
-    published: true,
-    featured: true,
-    views: 850,
-    publishedAt: '2024-01-08',
-    readTime: '8 menit',
-  },
-  {
-    id: 5,
-    title: 'Studi Kasus: Bagaimana Website Meningkatkan Penjualan Toko Online 400%',
-    slug: 'studi-kasus-website-meningkatkan-penjualan-400-persen',
-    excerpt: 'Kisah nyata bagaimana redesign website membantu klien kami meningkatkan penjualan hingga 400%.',
-    content: 'Klien kami, sebuah toko fashion online, mengalami peningkatan penjualan yang luar biasa...',
-    category: 'Studi Kasus',
-    tags: ['studi kasus', 'e-commerce', 'penjualan', 'success story'],
-    image: 'ART05',
-    published: true,
-    featured: false,
-    views: 1100,
-    publishedAt: '2024-01-05',
-    readTime: '10 menit',
-  },
-  {
-    id: 6,
-    title: 'SEO untuk Website Bisnis: Panduan Lengkap untuk Pemula',
-    slug: 'seo-untuk-website-bisnis-panduan-lengkap',
-    excerpt: 'Pelajari dasar-dasar SEO untuk meningkatkan ranking website bisnis Anda di Google.',
-    content: 'SEO (Search Engine Optimization) adalah kunci untuk membuat website Anda ditemukan...',
-    category: 'Digital Marketing',
-    tags: ['SEO', 'Google', 'ranking', 'traffic'],
-    image: 'ART06',
-    published: true,
-    featured: false,
-    views: 750,
-    publishedAt: '2024-01-03',
-    readTime: '12 menit',
-  },
-];
+const normalizePost = (raw: unknown): BlogPost => {
+  const post = typeof raw === 'object' && raw !== null ? (raw as Record<string, unknown>) : {};
+
+  const title = typeof post.title === 'string' ? post.title : 'Untitled';
+  const slug = typeof post.slug === 'string' ? post.slug : crypto.randomUUID();
+  const excerpt = typeof post.excerpt === 'string' ? post.excerpt : null;
+  const content = typeof post.content === 'string' ? post.content : '';
+  const category = typeof post.category === 'string' ? post.category : 'Lainnya';
+  const image = typeof post.image === 'string' ? post.image : null;
+  const tags = Array.isArray(post.tags) ? (post.tags as string[]) : [];
+  const featured = typeof post.featured === 'boolean' ? post.featured : Boolean(post.featured);
+  const views =
+    typeof post.views === 'number'
+      ? post.views
+      : Number.parseInt(typeof post.views === 'string' ? post.views : '0', 10) || 0;
+  const publishedAt = typeof post.publishedAt === 'string' ? post.publishedAt : null;
+  const readTime = typeof post.readTime === 'string' ? post.readTime : null;
+
+  return {
+    id: typeof post.id === 'string' ? post.id : crypto.randomUUID(),
+    title,
+    slug,
+    excerpt,
+    content,
+    category,
+    tags,
+    image,
+    featured,
+    views,
+    publishedAt,
+    readTime,
+  };
+};
+
+const fallbackBlogPosts: BlogPost[] = defaultBlogEntries.map((entry, index) => ({
+  id: `fallback-${index}`,
+  title: entry.title,
+  slug: entry.slug,
+  excerpt: entry.excerpt,
+  content: entry.content,
+  category: entry.category,
+  tags: entry.tags,
+  image: entry.image ?? null,
+  featured: entry.featured,
+  views: entry.views,
+  publishedAt: entry.publishedAt.toISOString().slice(0, 10),
+  readTime: entry.readTime,
+}));
+
+const formatDate = (value: string | null) => {
+  if (!value) {
+    return 'Belum dijadwalkan';
+  }
+
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) {
+    return 'Belum dijadwalkan';
+  }
+
+  return new Intl.DateTimeFormat('id-ID', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+  }).format(parsed);
+};
 
 export default function Blog() {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [activeCategory, setActiveCategory] = useState<Category>('Semua');
+  const { lang } = useLanguage();
+  const navCopy = {
+    id: {
+      tentang: 'Tentang',
+      portfolio: 'Portfolio',
+      blog: 'Blog',
+      contact: 'Kontak',
+    },
+    en: {
+      tentang: 'About',
+      portfolio: 'Portfolio',
+      blog: 'Blog',
+      contact: 'Contact',
+    },
+  } as const;
+  const navLabels = navCopy[(lang as 'id' | 'en') || 'id'];
 
-  const featuredPosts = useMemo(() => blogPosts.filter((post) => post.featured && post.published), []);
+  const [posts, setPosts] = useState<BlogPost[]>([]);
+  const [categories, setCategories] = useState<string[]>([...defaultCategories]);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [activeCategory, setActiveCategory] = useState<string>('Semua');
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const loadPosts = async () => {
+      setIsLoading(true);
+      setError(null);
+
+      try {
+        const response = await fetch('/api/blogs', { cache: 'no-store' });
+        if (!response.ok) {
+          throw new Error('Gagal memuat artikel blog.');
+        }
+
+        const data = await response.json();
+        if (!isMounted) return;
+
+        const normalized = Array.isArray(data.posts)
+          ? data.posts.map(normalizePost).filter((post) => post.slug)
+          : [];
+
+        const hydratedPosts = normalized.length > 0 ? normalized : fallbackBlogPosts;
+
+        setPosts(hydratedPosts);
+
+        const dynamicCategories = Array.from(
+          new Set(hydratedPosts.map((post) => post.category).filter(Boolean)),
+        );
+
+        setCategories(['Semua', ...dynamicCategories.filter((cat) => cat !== 'Semua')]);
+      } catch (err) {
+        if (!isMounted) return;
+        setPosts(fallbackBlogPosts);
+        const dynamicCategories = Array.from(
+          new Set(fallbackBlogPosts.map((post) => post.category).filter(Boolean)),
+        );
+        setCategories(['Semua', ...dynamicCategories.filter((cat) => cat !== 'Semua')]);
+        setError(err instanceof Error ? err.message : 'Terjadi kesalahan saat memuat artikel.');
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    loadPosts();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const featuredPosts = useMemo(
+    () => posts.filter((post) => post.featured).slice(0, 3),
+    [posts],
+  );
 
   const filteredPosts = useMemo(() => {
-    return blogPosts.filter((post) => {
-      if (!post.published) return false;
+    const term = searchTerm.trim().toLowerCase();
+
+    return posts.filter((post) => {
       const matchesCategory = activeCategory === 'Semua' || post.category === activeCategory;
-      const term = searchTerm.trim().toLowerCase();
-      if (!term) return matchesCategory;
+      if (!matchesCategory) {
+        return false;
+      }
 
-      const matchesSearch =
+      if (!term) {
+        return true;
+      }
+
+      const excerpt = post.excerpt ?? '';
+
+      return (
         post.title.toLowerCase().includes(term) ||
-        post.excerpt.toLowerCase().includes(term) ||
-        post.tags.some((tag) => tag.toLowerCase().includes(term));
-
-      return matchesCategory && matchesSearch;
+        excerpt.toLowerCase().includes(term) ||
+        post.tags.some((tag) => tag.toLowerCase().includes(term))
+      );
     });
-  }, [activeCategory, searchTerm]);
+  }, [activeCategory, posts, searchTerm]);
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-[#05070d] text-slate-100">
@@ -204,7 +258,7 @@ export default function Blog() {
             />
           </div>
           <div className="text-sm text-slate-400">
-            {filteredPosts.length} artikel tersedia
+            {isLoading ? 'Memuat artikel...' : `${posts.length} artikel tersedia`}
           </div>
         </motion.section>
 
@@ -230,9 +284,12 @@ export default function Blog() {
               </button>
             ))}
           </div>
+          {error && !isLoading && (
+            <p className="mt-4 text-center text-sm text-red-300">{error}</p>
+          )}
         </motion.section>
 
-        {featuredPosts.length > 0 && (
+        {(featuredPosts.length > 0 || isLoading) && (
           <motion.section
             initial="hidden"
             whileInView="show"
@@ -256,20 +313,22 @@ export default function Blog() {
                 >
                   <div className="relative flex aspect-video items-center justify-center overflow-hidden">
                     <div className="absolute inset-0 bg-gradient-to-br from-[#6d6bff]/15 via-transparent to-[#a855f7]/20" />
-                    <span className="relative text-4xl font-semibold text-white/70">{post.image}</span>
+                    <span className="relative text-4xl font-semibold text-white/70">
+                      {(post.image ?? post.title.slice(0, 3)).toUpperCase()}
+                    </span>
                   </div>
                   <div className="flex flex-1 flex-col gap-4 p-6">
                     <span className="inline-flex w-fit items-center gap-2 rounded-full border border-[#273149] bg-[#0b1324]/70 px-3 py-1 text-xs font-medium uppercase tracking-[0.18em] text-[#8b5cf6]">
                       <Tag className="h-3.5 w-3.5" />
                       {post.category}
                     </span>
-                    <h3 className="text-xl font-semibold text-white group-hover:text-[#8b5cf6] transition-colors">
+                    <h3 className="text-xl font-semibold text-white transition-colors group-hover:text-[#8b5cf6]">
                       {post.title}
                     </h3>
-                    <p className="text-sm text-slate-300 line-clamp-3">{post.excerpt}</p>
+                    <p className="text-sm text-slate-300 line-clamp-3">{post.excerpt ?? 'Belum ada ringkasan.'}</p>
                     <div className="flex items-center gap-4 text-xs uppercase tracking-[0.28em] text-slate-500">
-                      <span>{post.publishedAt}</span>
-                      <span>{post.readTime}</span>
+                      <span>{formatDate(post.publishedAt)}</span>
+                      <span>{post.readTime ?? '—'}</span>
                     </div>
                     <button className="inline-flex items-center gap-2 text-sm font-semibold text-[#8b5cf6] transition-transform hover:translate-x-1">
                       Baca selengkapnya
@@ -278,6 +337,18 @@ export default function Blog() {
                   </div>
                 </motion.article>
               ))}
+
+              {!featuredPosts.length && !isLoading && (
+                <div className="col-span-1 flex flex-col items-center justify-center rounded-3xl border border-dashed border-[#1f2b42] bg-[#080f1f]/60 p-10 text-center text-sm text-slate-400 lg:col-span-3">
+                  Belum ada artikel highlight yang dipublikasikan.
+                </div>
+              )}
+
+              {isLoading && (
+                <div className="col-span-1 flex flex-col items-center justify-center rounded-3xl border border-[#1f2b42] bg-[#080f1f]/60 p-10 text-center text-sm text-slate-400 lg:col-span-3">
+                  Memuat artikel unggulan...
+                </div>
+              )}
             </div>
           </motion.section>
         )}
@@ -294,7 +365,9 @@ export default function Blog() {
               <h3 className="text-2xl font-semibold text-white">Semua artikel</h3>
               <p className="text-sm text-slate-400">Kurasi mingguan tentang strategi web, growth, dan praktik terbaik digital.</p>
             </div>
-            <span className="text-sm text-slate-500">{filteredPosts.length} artikel ditemukan</span>
+            <span className="text-sm text-slate-500">
+              {isLoading ? 'Memuat artikel...' : `${filteredPosts.length} artikel ditemukan`}
+            </span>
           </div>
 
           <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
@@ -309,23 +382,25 @@ export default function Blog() {
               >
                 <div className="relative flex aspect-video items-center justify-center overflow-hidden">
                   <div className="absolute inset-0 bg-gradient-to-br from-[#1f2b42]/40 via-transparent to-[#6d6bff]/25" />
-                  <span className="relative text-3xl font-semibold text-white/70">{post.image}</span>
+                  <span className="relative text-3xl font-semibold text-white/70">
+                    {(post.image ?? post.title.slice(0, 2)).toUpperCase()}
+                  </span>
                 </div>
                 <div className="flex flex-1 flex-col gap-4 p-6">
                   <div className="flex items-center gap-4 text-xs text-slate-400">
                     <span className="flex items-center gap-1">
                       <Calendar className="h-4 w-4" />
-                      {post.publishedAt}
+                      {formatDate(post.publishedAt)}
                     </span>
                     <span className="flex items-center gap-1">
                       <Eye className="h-4 w-4" />
-                      {post.views}
+                      {post.views.toLocaleString('id-ID')}
                     </span>
                   </div>
                   <h4 className="text-lg font-semibold text-white transition-colors group-hover:text-[#8b5cf6]">
                     {post.title}
                   </h4>
-                  <p className="text-sm text-slate-300 line-clamp-2">{post.excerpt}</p>
+                  <p className="text-sm text-slate-300 line-clamp-2">{post.excerpt ?? 'Belum ada ringkasan artikel.'}</p>
                   <button className="inline-flex items-center gap-2 text-sm font-medium text-[#8b5cf6] transition-transform hover:translate-x-1">
                     Baca Artikel
                     <ArrowRight className="h-4 w-4" />
@@ -333,9 +408,19 @@ export default function Blog() {
                 </div>
               </motion.article>
             ))}
+
+            {isLoading &&
+              Array.from({ length: 3 }).map((_, index) => (
+                <div
+                  key={`skeleton-${index}`}
+                  className="flex h-full flex-col overflow-hidden rounded-3xl border border-dashed border-[#1f2b42] bg-[#080f1f]/40 p-6 text-sm text-slate-500"
+                >
+                  Memuat artikel...
+                </div>
+              ))}
           </div>
 
-          {filteredPosts.length === 0 && (
+          {filteredPosts.length === 0 && !isLoading && (
             <div className="mt-12 text-center">
               <div className="inline-flex h-16 w-16 items-center justify-center rounded-full border border-dashed border-[#273149] text-sm font-semibold uppercase tracking-[0.32em] text-slate-500">
                 No

@@ -88,6 +88,7 @@ model Portfolio {
   rating      Int?     @default(5)
   featured    Boolean  @default(false)
   active      Boolean  @default(true)
+  status      String   @default("ongoing")
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -124,6 +125,7 @@ model BlogPost {
   image       String?
   category    String
   tags        String // JSON string of tags (SQLite doesn't support arrays)
+  readTime    String?
   published   Boolean  @default(false)
   featured    Boolean  @default(false)
   views       Int      @default(0)

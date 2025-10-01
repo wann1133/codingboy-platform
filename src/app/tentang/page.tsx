@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import PrimaryNav from '@/components/PrimaryNav';
+import { useLanguage } from '@/components/LanguageContext';
 import {
   ArrowRight,
   MessageCircle,
@@ -142,12 +143,22 @@ const fadeUp = {
 } as const;
 
 export default function Tentang() {
-  const navLabels = {
-    tentang: 'Tentang',
-    portfolio: 'Portfolio',
-    blog: 'Blog',
-    contact: 'Kontak',
+  const { lang } = useLanguage();
+  const navCopy = {
+    id: {
+      tentang: 'Tentang',
+      portfolio: 'Portfolio',
+      blog: 'Blog',
+      contact: 'Kontak',
+    },
+    en: {
+      tentang: 'About',
+      portfolio: 'Portfolio',
+      blog: 'Blog',
+      contact: 'Contact',
+    },
   } as const;
+  const navLabels = navCopy[(lang as 'id' | 'en') || 'id'];
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-[#05070d] text-slate-100">

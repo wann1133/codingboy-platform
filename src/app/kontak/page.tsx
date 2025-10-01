@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import PrimaryNav from '@/components/PrimaryNav';
+import { useLanguage } from '@/components/LanguageContext';
 import { 
   MessageCircle, 
   Mail, 
@@ -29,6 +30,22 @@ export default function Kontak() {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const { lang } = useLanguage();
+  const navCopy = {
+    id: {
+      tentang: 'Tentang',
+      portfolio: 'Portfolio',
+      blog: 'Blog',
+      contact: 'Kontak',
+    },
+    en: {
+      tentang: 'About',
+      portfolio: 'Portfolio',
+      blog: 'Blog',
+      contact: 'Contact',
+    },
+  } as const;
+  const navLabels = navCopy[(lang as 'id' | 'en') || 'id'];
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     setFormData({
@@ -148,13 +165,6 @@ export default function Kontak() {
       answer: "Semua website kami dibuat dengan standar SEO terbaik untuk membantu ranking di Google."
     }
   ];
-
-  const navLabels = {
-    tentang: 'Tentang',
-    portfolio: 'Portfolio',
-    blog: 'Blog',
-    contact: 'Kontak',
-  } as const;
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-[#05070d] text-slate-100">
@@ -483,5 +493,4 @@ export default function Kontak() {
     </div>
   );
 }
-
 
