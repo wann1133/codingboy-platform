@@ -1,10 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 
-import {
-  blogSeedPayload,
-
-  portfolioSeedPayload,
-} from '../src/lib/default-content';
+import { blogSeedPayload, portfolioSeedPayload } from '../src/lib/default-content';
 
 const prisma = new PrismaClient();
 

@@ -20,7 +20,7 @@ Marketplace platform untuk jasa pembuatan website yang menargetkan UKM dan Start
 - **Frontend**: Next.js 15 (App Router)
 - **Styling**: Tailwind CSS + Custom Glassmorphism
 - **Authentication**: Clerk
-- **Data Layer**: Static content (no database required)
+- **Data Layer**: Prisma ORM + Neon Postgres
 - **Animations**: Framer Motion
 - **Icons**: Lucide React
 - **Forms**: React Hook Form + Zod
@@ -41,36 +41,48 @@ cd codingboy-platform
 npm install
 ```
 
-### 3. Environment Setup
+### 3. Configure Environment
 
-Buat file `.env.local` dan isi dengan:
-
-```env
-# Clerk Authentication
-NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_your_key_here
-CLERK_SECRET_KEY=sk_test_your_key_here
-
-# Clerk URLs
-NEXT_PUBLIC_CLERK_SIGN_IN_URL=/sign-in
-NEXT_PUBLIC_CLERK_SIGN_UP_URL=/sign-up
-NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL=/dashboard
-NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL=/dashboard
-
-
-# Payment Gateway (Midtrans)
-MIDTRANS_SERVER_KEY=your_midtrans_server_key
-MIDTRANS_CLIENT_KEY=your_midtrans_client_key
-MIDTRANS_IS_PRODUCTION=false
-
-# WhatsApp Integration
-WHATSAPP_PHONE_NUMBER=+62881025741054
+```bash
+cp .env.example .env.local
 ```
 
-### 4. Run Development Server
+Isi nilai berikut di `.env.local`:
+
+- `DATABASE_URL` & `DIRECT_DATABASE_URL` → connection string Postgres (Neon disarankan, gunakan string pooling).
+- `ADMIN_EMAIL`, `ADMIN_PASSWORD_HASH`, `ADMIN_TOKEN_SECRET` → kredensial panel admin (hash default di contoh bisa diganti dengan milikmu sendiri).
+- Keys Clerk (`NEXT_PUBLIC_CLERK_*`, `CLERK_SECRET_KEY`).
+- Midtrans & WhatsApp terkait.
+
+### 4. Siapkan Database & Seed
+
+```bash
+npx prisma migrate deploy
+npx prisma db seed
+```
+
+Perintah di atas akan membangun skema di database Postgres dan mengisi data awal (blog & portofolio dummy).
+
+### 5. Jalankan Development Server
 
 ```bash
 npm run dev
 ```
+
+## 🗄️ Database & Seeding
+
+1. **Buat database Postgres** (mis. Neon). Gunakan connection string pooling (`postgresql://.../dbname?sslmode=require`).
+2. **Set variabel lingkungan lokal** pada `.env.local` (`DATABASE_URL`, `DIRECT_DATABASE_URL`).
+3. **Migrasi skema**:
+   ```bash
+   npx prisma migrate deploy
+   ```
+4. **Seed konten awal** (blog, portofolio, layanan, testimonial):
+   ```bash
+   npx prisma db seed
+   ```
+5. Aplikasi akan otomatis menjaga dummy data tetap tersedia via API admin/public bila tabel kosong.
+6. Kredensial default admin pada `.env.example` (`admin@codingboy.dev` / hash `admin123`) hanya untuk pengembangan—ganti hash menggunakan `node -e "console.log(require('bcryptjs').hashSync('passwordBaru', 12))"` sebelum production.
 
 Buka [http://localhost:3000](http://localhost:3000) di browser.
 
@@ -144,12 +156,28 @@ Text Secondary: #d1d5db (gray-300)
 
 ## 🚀 Deployment
 
-### Vercel (Recommended)
+### Vercel + Neon (Recommended)
 
-1. Push ke GitHub repository
-2. Connect ke Vercel
-3. Set environment variables
-4. Deploy!
+1. **Buat database** di [Neon](https://neon.tech/):
+   - Salin connection string pooling (`DATABASE_URL`).
+   - Opsional: salin juga direct connection (`DIRECT_DATABASE_URL`) untuk migrasi & seed.
+2. **Seed database** sekali menggunakan Neon connection:
+   ```bash
+   # lokal
+   DATABASE_URL="postgresql://..." npx prisma migrate deploy
+   DATABASE_URL="postgresql://..." npx prisma db seed
+   ```
+3. **Hubungkan repo ke Vercel** (Import Project → pilih repository ini).
+4. **Set environment variables** di Vercel Project Settings → Environment Variables:
+   - `DATABASE_URL`
+   - `DIRECT_DATABASE_URL` (opsional tetapi dianjurkan untuk Prisma Accelerate/pooling)
+   - `ADMIN_EMAIL`
+   - `ADMIN_PASSWORD_HASH`
+   - `ADMIN_TOKEN_SECRET`
+   - `NEXT_PUBLIC_CLERK_*`, `CLERK_SECRET_KEY`
+   - `MIDTRANS_*`, `WHATSAPP_PHONE_NUMBER`
+5. Trigger deploy (`npm run build` + `next start` otomatis ditangani Vercel).
+6. Setelah deploy, akses `/admin/login` dengan kredensial yang ditetapkan.
 
 ### Manual Deployment
 
@@ -157,6 +185,8 @@ Text Secondary: #d1d5db (gray-300)
 npm run build
 npm start
 ```
+
+Pastikan variabel lingkungan (`DATABASE_URL`, `ADMIN_*`, `CLERK_*`, dsb.) tersedia di proses runtime sebelum menjalankan `npm start`.
 
 ## 📊 SEO & Performance
 
