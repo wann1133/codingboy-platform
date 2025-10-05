@@ -1,4 +1,5 @@
 'use client';
+import Link from 'next/link';
 
 import { useState } from 'react';
 
@@ -84,25 +85,25 @@ console.log(greetUser("CodingBoy"));`);
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center">
               <div className="flex-shrink-0">
-                <a href="/" className="text-2xl font-bold text-indigo-600 dark:text-indigo-400">
+                <Link href="/" className="text-2xl font-bold text-indigo-600 dark:text-indigo-400">
                   CodingBoy
-                </a>
+                </Link>
               </div>
             </div>
             <div className="hidden md:block">
               <div className="ml-10 flex items-baseline space-x-4">
-                <a href="/" className="text-gray-600 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 px-3 py-2 rounded-md text-sm font-medium">
+                <Link href="/" className="text-gray-600 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 px-3 py-2 rounded-md text-sm font-medium">
                   Home
-                </a>
-                <a href="/courses" className="text-gray-600 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 px-3 py-2 rounded-md text-sm font-medium">
+                </Link>
+                <Link href="/courses" className="text-gray-600 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 px-3 py-2 rounded-md text-sm font-medium">
                   Courses
-                </a>
-                <a href="/practice" className="text-gray-900 dark:text-gray-100 hover:text-indigo-600 dark:hover:text-indigo-400 px-3 py-2 rounded-md text-sm font-medium">
+                </Link>
+                <Link href="/practice" className="text-gray-900 dark:text-gray-100 hover:text-indigo-600 dark:hover:text-indigo-400 px-3 py-2 rounded-md text-sm font-medium">
                   Practice
-                </a>
-                <a href="#" className="text-gray-600 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 px-3 py-2 rounded-md text-sm font-medium">
+                </Link>
+                <Link href="/tentang" className="text-gray-600 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 px-3 py-2 rounded-md text-sm font-medium">
                   About
-                </a>
+                </Link>
               </div>
             </div>
             <div className="flex items-center space-x-4">
@@ -222,7 +223,7 @@ console.log(greetUser("CodingBoy"));`);
                 </div>
                 <div className="p-6">
                   <div className="bg-gray-900 text-green-400 p-4 rounded-lg font-mono text-sm min-h-[100px]">
-                    <div className="text-gray-500">// Output will appear here when you run your code</div>
+                    <div className="text-gray-500">Output will appear here when you run your code</div>
                   </div>
                 </div>
               </div>
@@ -253,3 +254,4 @@ console.log(greetUser("CodingBoy"));`);
     </div>
   );
 }
+

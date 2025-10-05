@@ -2,7 +2,6 @@ import { Prisma } from '@prisma/client';
 import { NextResponse } from 'next/server';
 
 import { UnauthenticatedError, requireAdminSession } from '@/lib/api-auth';
-import { ensureDefaultPortfolios } from '@/lib/seed-defaults';
 import prisma from '@/lib/prisma';
 
 const slugify = (value: string) =>
@@ -12,31 +11,7 @@ const slugify = (value: string) =>
     .trim()
     .replace(/\s+/g, '-');
 
-const serializePortfolio = (item: Awaited<ReturnType<typeof prisma.portfolio.create>>) => ({
-  id: item.id,
-  title: item.title,
-  slug: item.slug,
-  description: item.description,
-  category: item.category,
-  image: item.image,
-  url: item.url,
-  features: item.features,
-  duration: item.duration,
-  client: item.client,
-  testimonial: item.testimonial,
-  rating: item.rating,
-  featured: item.featured,
-  active: item.active,
-  status: item.status,
-  createdAt: item.createdAt,
-  updatedAt: item.updatedAt,
-});
-
-const ensurePortfolioSeed = async () => {
-  await ensureDefaultPortfolios();
-};
-
-export async function GET() {
+export async function GET(request: Request, { params }: { params: { id: string } }) {
   try {
     await requireAdminSession();
   } catch (error) {
@@ -47,16 +22,20 @@ export async function GET() {
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 
-  await ensurePortfolioSeed();
+  const { id } = params;
 
-  const portfolios = await prisma.portfolio.findMany({
-    orderBy: { createdAt: 'desc' },
+  const portfolio = await prisma.portfolio.findUnique({
+    where: { id },
   });
 
-  return NextResponse.json({ portfolios: portfolios.map(serializePortfolio) });
+  if (!portfolio) {
+    return NextResponse.json({ error: 'Portfolio item not found.' }, { status: 404 });
+  }
+
+  return NextResponse.json({ portfolio });
 }
 
-export async function POST(request: Request) {
+export async function PUT(request: Request, { params }: { params: { id: string } }) {
   try {
     await requireAdminSession();
   } catch (error) {
@@ -67,8 +46,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 
-  await ensurePortfolioSeed();
-
+  const { id } = params;
   const body = await request.json().catch(() => null);
 
   if (!body) {
@@ -99,7 +77,8 @@ export async function POST(request: Request) {
   const parsedRating = Number.parseInt(rating, 10);
 
   try {
-    const portfolio = await prisma.portfolio.create({
+    const portfolio = await prisma.portfolio.update({
+      where: { id },
       data: {
         title,
         slug,
@@ -126,12 +105,36 @@ export async function POST(request: Request) {
       },
     });
 
-    return NextResponse.json({ portfolio: serializePortfolio(portfolio) }, { status: 201 });
+    return NextResponse.json({ portfolio }, { status: 200 });
   } catch (error: unknown) {
     if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
       return NextResponse.json({ error: 'Slug portofolio sudah digunakan.' }, { status: 409 });
     }
 
-    return NextResponse.json({ error: 'Gagal menyimpan portofolio.' }, { status: 500 });
+    return NextResponse.json({ error: 'Gagal memperbarui portofolio.' }, { status: 500 });
+  }
+}
+
+export async function DELETE(request: Request, { params }: { params: { id: string } }) {
+  try {
+    await requireAdminSession();
+  } catch (error) {
+    if (error instanceof UnauthenticatedError) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+  }
+
+  const { id } = params;
+
+  try {
+    await prisma.portfolio.delete({
+      where: { id },
+    });
+
+    return NextResponse.json({ message: 'Portfolio item deleted successfully.' }, { status: 200 });
+  } catch {
+    return NextResponse.json({ error: 'Failed to delete portfolio item.' }, { status: 500 });
   }
 }

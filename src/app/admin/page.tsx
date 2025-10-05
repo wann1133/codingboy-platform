@@ -1,25 +1,35 @@
 'use client';
 
-import type { FormEvent } from 'react';
 import { useEffect, useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 
-import { defaultBlogEntries, defaultPortfolioEntries } from '@/lib/default-content';
 import {
+  AlertTriangle,
   Calendar,
   CircleCheck,
-  Globe,
-  Image as ImageIcon,
+  EllipsisVertical,
   LayoutDashboard,
   Layers3,
   Link as LinkIcon,
   NotebookPen,
+  Pencil,
+  Plus,
   Rocket,
   Sparkles,
   Star,
   Tag,
+  Trash2,
 } from 'lucide-react';
+
+import {
+  BlogPost,
+  PortfolioItem,
+  fallbackAdminBlogPosts,
+  fallbackAdminPortfolio,
+  normalizeBlogPost,
+  normalizePortfolioItem,
+} from './shared';
 
 const formatDate = (value: string | null | undefined) => {
   if (!value) {
@@ -38,262 +48,25 @@ const formatDate = (value: string | null | undefined) => {
   }).format(parsed);
 };
 
-const slugify = (raw: string) =>
-  raw
-    .toLowerCase()
-    .replace(/[^a-z0-9\s-]/g, '')
-    .trim()
-    .replace(/\s+/g, '-');
-
-type BlogStatus = 'draft' | 'published';
-type ProjectStatus = 'ongoing' | 'completed';
-
-type BlogPost = {
-  id: string;
-  title: string;
-  slug: string;
-  excerpt: string | null;
-  content: string;
-  category: string;
-  image: string | null;
-  tags: string[];
-  readTime: string | null;
-  published: boolean;
-  featured: boolean;
-  views: number;
-  publishedAt: string | null;
-  createdAt: string;
-  updatedAt: string;
-};
-
-type PortfolioItem = {
-  id: string;
-  title: string;
-  slug: string;
-  description: string;
-  category: string;
-  image: string | null;
-  url: string | null;
-  features: string[];
-  duration: string;
-  client: string | null;
-  testimonial: string | null;
-  rating: number | null;
-  featured: boolean;
-  active: boolean;
-  status: ProjectStatus;
-  createdAt: string;
-  updatedAt: string;
-};
-
-type BlogFormState = {
-  title: string;
-  summary: string;
-  content: string;
-  category: string;
-  publishedAt: string;
-  readTime: string;
-  tags: string;
-  status: BlogStatus;
-  featured: boolean;
-  image: string;
-};
-
-const fallbackAdminBlogPosts: BlogPost[] = defaultBlogEntries.map((entry, index) => ({
-  id: `fallback-blog-${index}`,
-  title: entry.title,
-  slug: entry.slug,
-  excerpt: entry.excerpt ?? null,
-  content: entry.content,
-  category: entry.category,
-  image: entry.image ?? null,
-  tags: entry.tags,
-  readTime: entry.readTime,
-  published: true,
-  featured: entry.featured,
-  views: entry.views,
-  publishedAt: entry.publishedAt.toISOString(),
-  createdAt: entry.publishedAt.toISOString(),
-  updatedAt: entry.publishedAt.toISOString(),
-}));
-
-const fallbackAdminPortfolio: PortfolioItem[] = defaultPortfolioEntries.map((entry, index) => ({
-  id: `fallback-portfolio-${index}`,
-  title: entry.title,
-  slug: entry.slug,
-  description: entry.description,
-  category: entry.category,
-  image: entry.image ?? null,
-  url: entry.url ?? null,
-  features: entry.features,
-  duration: entry.duration,
-  client: entry.client ?? null,
-  testimonial: entry.testimonial ?? null,
-  rating: entry.rating ?? 5,
-  featured: entry.featured,
-  active: entry.active ?? true,
-  status: entry.status,
-  createdAt: new Date().toISOString(),
-  updatedAt: new Date().toISOString(),
-}));
-
-type PortfolioFormState = {
-  title: string;
-  description: string;
-  category: string;
-  image: string;
-  url: string;
-  duration: string;
-  client: string;
-  testimonial: string;
-  rating: string;
-  features: string;
-  status: ProjectStatus;
-  featured: boolean;
-  active: boolean;
-};
-
-const blogCategories = [
-  'Produk & Design',
-  'Digital Marketing',
-  'Growth & Analytics',
-  'Teknologi',
-  'Kisah Klien',
-] as const;
-
-const projectCategories = [
-  'Web Application',
-  'Corporate Website',
-  'Landing Page',
-  'Booking Platform',
-  'E-Commerce',
-  'Design System',
-] as const;
-
-const defaultBlogForm = (): BlogFormState => ({
-  title: '',
-  summary: '',
-  content: '',
-  category: blogCategories[0],
-  publishedAt: new Date().toISOString().slice(0, 10),
-  readTime: '5 menit',
-  tags: '',
-  status: 'draft',
-  featured: false,
-  image: '',
-});
-
-const defaultPortfolioForm = (): PortfolioFormState => ({
-  title: '',
-  description: '',
-  category: projectCategories[0],
-  image: '',
-  url: '',
-  duration: '7 hari',
-  client: '',
-  testimonial: '',
-  rating: '5',
-  features: '',
-  status: 'ongoing',
-  featured: false,
-  active: true,
-});
-
-const normalizeBlogPost = (raw: unknown): BlogPost => {
-  const post = typeof raw === 'object' && raw !== null ? (raw as Record<string, unknown>) : {};
-
-  const title = typeof post.title === 'string' ? post.title : 'Untitled';
-  const slugValue = typeof post.slug === 'string' ? post.slug : slugify(title);
-  const excerpt = typeof post.excerpt === 'string' ? post.excerpt : null;
-  const content = typeof post.content === 'string' ? post.content : '';
-  const category = typeof post.category === 'string' ? post.category : 'Lainnya';
-  const image = typeof post.image === 'string' ? post.image : null;
-  const tags = Array.isArray(post.tags) ? (post.tags as string[]) : [];
-  const readTime = typeof post.readTime === 'string' ? post.readTime : null;
-  const published = typeof post.published === 'boolean' ? post.published : Boolean(post.published);
-  const featured = typeof post.featured === 'boolean' ? post.featured : Boolean(post.featured);
-  const viewsValue =
-    typeof post.views === 'number'
-      ? post.views
-      : Number.parseInt(typeof post.views === 'string' ? post.views : '0', 10) || 0;
-  const publishedAt = typeof post.publishedAt === 'string' ? post.publishedAt : null;
-  const createdAt = typeof post.createdAt === 'string' ? post.createdAt : new Date().toISOString();
-  const updatedAt = typeof post.updatedAt === 'string' ? post.updatedAt : new Date().toISOString();
-
-  return {
-    id: typeof post.id === 'string' ? post.id : crypto.randomUUID(),
-    title,
-    slug: slugValue,
-    excerpt,
-    content,
-    category,
-    image,
-    tags,
-    readTime,
-    published,
-    featured,
-    views: viewsValue,
-    publishedAt,
-    createdAt,
-    updatedAt,
-  };
-};
-
-const normalizePortfolioItem = (raw: unknown): PortfolioItem => {
-  const item = typeof raw === 'object' && raw !== null ? (raw as Record<string, unknown>) : {};
-
-  const title = typeof item.title === 'string' ? item.title : 'Untitled Project';
-  const slugValue = typeof item.slug === 'string' ? item.slug : slugify(title);
-  const description = typeof item.description === 'string' ? item.description : '';
-  const category = typeof item.category === 'string' ? item.category : 'General';
-  const image = typeof item.image === 'string' ? item.image : null;
-  const url = typeof item.url === 'string' ? item.url : null;
-  const features = Array.isArray(item.features) ? (item.features as string[]) : [];
-  const duration = typeof item.duration === 'string' ? item.duration : '7 hari';
-  const client = typeof item.client === 'string' ? item.client : null;
-  const testimonial = typeof item.testimonial === 'string' ? item.testimonial : null;
-  const ratingValue =
-    typeof item.rating === 'number'
-      ? item.rating
-      : Number.parseInt(typeof item.rating === 'string' ? item.rating : '0', 10) || null;
-  const status = item.status === 'completed' ? 'completed' : 'ongoing';
-  const featured = typeof item.featured === 'boolean' ? item.featured : Boolean(item.featured);
-  const active = item.active !== false;
-  const createdAt = typeof item.createdAt === 'string' ? item.createdAt : new Date().toISOString();
-  const updatedAt = typeof item.updatedAt === 'string' ? item.updatedAt : new Date().toISOString();
-
-  return {
-    id: typeof item.id === 'string' ? item.id : crypto.randomUUID(),
-    title,
-    slug: slugValue,
-    description,
-    category,
-    image,
-    url,
-    features,
-    duration,
-    client,
-    testimonial,
-    rating: ratingValue,
-    featured,
-    active,
-    status,
-    createdAt,
-    updatedAt,
-  };
-};
+type SectionKey = 'overview' | 'blog' | 'portfolio';
+type DeleteTarget = { type: 'blog' | 'portfolio'; id: string; label: string };
 
 export default function AdminContentStudio() {
   const router = useRouter();
-  const [activeSection, setActiveSection] = useState<'overview' | 'blog' | 'portfolio'>('overview');
+  const searchParams = useSearchParams();
+  const [activeSection, setActiveSection] = useState<SectionKey>(() => {
+    const section = searchParams.get('section');
+    return section === 'blog' || section === 'portfolio' ? section : 'overview';
+  });
   const [blogPosts, setBlogPosts] = useState<BlogPost[]>([]);
   const [portfolioItems, setPortfolioItems] = useState<PortfolioItem[]>([]);
-  const [blogForm, setBlogForm] = useState<BlogFormState>(defaultBlogForm);
-  const [portfolioForm, setPortfolioForm] = useState<PortfolioFormState>(defaultPortfolioForm);
-  const [blogNotice, setBlogNotice] = useState<string | null>(null);
-  const [projectNotice, setProjectNotice] = useState<string | null>(null);
   const [fetchError, setFetchError] = useState<string | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState({ blog: false, portfolio: false, logout: false });
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [actionMenu, setActionMenu] = useState<{ type: 'blog' | 'portfolio'; id: string } | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<DeleteTarget | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [notification, setNotification] = useState<string | null>(null);
 
   useEffect(() => {
     let isMounted = true;
@@ -338,8 +111,6 @@ export default function AdminContentStudio() {
         setBlogPosts(fallbackAdminBlogPosts);
         setPortfolioItems(fallbackAdminPortfolio);
         setFetchError(error instanceof Error ? error.message : 'Gagal memuat data admin.');
-      } finally {
-        // no-op
       }
     };
 
@@ -349,6 +120,52 @@ export default function AdminContentStudio() {
       isMounted = false;
     };
   }, [router]);
+
+  useEffect(() => {
+    const section = searchParams.get('section');
+    if (section === 'blog' || section === 'portfolio' || section === 'overview') {
+      setActiveSection(section);
+    }
+  }, [searchParams]);
+
+  useEffect(() => {
+    if (!actionMenu) {
+      return;
+    }
+
+    const handleClickOutside = (event: MouseEvent) => {
+      if (!(event.target instanceof HTMLElement)) {
+        return;
+      }
+      if (event.target.closest('[data-menu-container="true"]')) {
+        return;
+      }
+      setActionMenu(null);
+    };
+
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setActionMenu(null);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('keydown', handleEscape);
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleEscape);
+    };
+  }, [actionMenu]);
+
+  useEffect(() => {
+    if (notification) {
+      const timer = setTimeout(() => {
+        setNotification(null);
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [notification]);
 
   const metrics = useMemo(() => {
     const publishedBlog = blogPosts.filter((post) => post.published).length;
@@ -395,127 +212,115 @@ export default function AdminContentStudio() {
       .slice(0, 6);
   }, [blogPosts, portfolioItems]);
 
-  const handleBlogSubmit = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
+  const highlightedProjects = useMemo(
+    () => portfolioItems.filter((item) => item.featured).slice(0, 3),
+    [portfolioItems],
+  );
 
-    if (!blogForm.title.trim() || !blogForm.summary.trim() || !blogForm.content.trim()) {
-      setBlogNotice('Judul, ringkasan, dan konten wajib diisi.');
+  const scheduledPosts = useMemo(() => {
+    return blogPosts
+      .filter((post) => !post.published)
+      .slice()
+      .sort((a, b) => {
+        const timeA = new Date(a.publishedAt ?? a.createdAt).getTime();
+        const timeB = new Date(b.publishedAt ?? b.createdAt).getTime();
+        const safeA = Number.isNaN(timeA) ? Number.POSITIVE_INFINITY : timeA;
+        const safeB = Number.isNaN(timeB) ? Number.POSITIVE_INFINITY : timeB;
+        return safeA - safeB;
+      })
+      .slice(0, 3);
+  }, [blogPosts]);
+
+  const activeProjects = useMemo(
+    () => portfolioItems.filter((item) => item.status !== 'completed').slice(0, 3),
+    [portfolioItems],
+  );
+
+  const handleBlogAddClick = () => {
+    router.push('/admin/blog/new');
+  };
+
+  const handleBlogEdit = (postId: string) => {
+    router.push(`/admin/blog/${postId}/edit`);
+    setActionMenu(null);
+  };
+
+  const handlePortfolioAddClick = () => {
+    router.push('/admin/portfolio/new');
+  };
+
+  const handlePortfolioEdit = (projectId: string) => {
+    router.push(`/admin/portfolio/${projectId}/edit`);
+    setActionMenu(null);
+  };
+
+  const toggleActionMenu = (type: 'blog' | 'portfolio', id: string) => {
+    setActionMenu((current) => (current?.type === type && current.id === id ? null : { type, id }));
+  };
+
+  const handleDeleteRequest = (type: 'blog' | 'portfolio', id: string, label: string) => {
+    setDeleteTarget({ type, id, label });
+    setActionMenu(null);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!deleteTarget) {
       return;
     }
 
-    setBlogNotice(null);
-    setIsSubmitting((prev) => ({ ...prev, blog: true }));
+    setIsDeleting(true);
+    setDeleteError(null);
+
+    const endpoint =
+      deleteTarget.type === 'blog'
+        ? `/api/admin/blogs/${deleteTarget.id}`
+        : `/api/admin/portfolios/${deleteTarget.id}`;
 
     try {
-      const response = await fetch('/api/admin/blogs', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          title: blogForm.title.trim(),
-          summary: blogForm.summary.trim(),
-          content: blogForm.content.trim(),
-          category: blogForm.category,
-          image: blogForm.image.trim() || null,
-          tags: blogForm.tags,
-          readTime: blogForm.readTime.trim() || null,
-          status: blogForm.status,
-          featured: blogForm.featured,
-          publishedAt: blogForm.publishedAt,
-        }),
-      });
-
-      const data = await response.json();
+      const response = await fetch(endpoint, { method: 'DELETE' });
+      const payload = await response.json().catch(() => null);
 
       if (!response.ok) {
-        setBlogNotice(data?.error ?? 'Gagal menyimpan artikel.');
-        return;
+        throw new Error(payload?.error ?? 'Gagal menghapus data.');
       }
 
-      const newPost = normalizeBlogPost(data.post);
-      setBlogPosts((prev) => [newPost, ...prev]);
-      setBlogForm(defaultBlogForm());
-      setBlogNotice('Artikel baru berhasil masuk studio konten.');
+      if (deleteTarget.type === 'blog') {
+        setBlogPosts((prev) => prev.filter((post) => post.id !== deleteTarget.id));
+      } else {
+        setPortfolioItems((prev) => prev.filter((item) => item.id !== deleteTarget.id));
+      }
+
+      setNotification(`${deleteTarget.type === 'blog' ? 'Artikel' : 'Portofolio'} "${deleteTarget.label}" berhasil dihapus.`);
+      setDeleteTarget(null);
+      setActionMenu(null);
     } catch (error) {
-      setBlogNotice(
-        error instanceof Error ? error.message : 'Terjadi kesalahan saat menghubungi server.',
-      );
+      setDeleteError(error instanceof Error ? error.message : 'Gagal menghapus data.');
     } finally {
-      setIsSubmitting((prev) => ({ ...prev, blog: false }));
+      setIsDeleting(false);
     }
   };
 
-  const handlePortfolioSubmit = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-
-    if (!portfolioForm.title.trim() || !portfolioForm.description.trim()) {
-      setProjectNotice('Nama proyek dan deskripsi wajib diisi.');
-      return;
-    }
-
-    setProjectNotice(null);
-    setIsSubmitting((prev) => ({ ...prev, portfolio: true }));
-
-    try {
-      const response = await fetch('/api/admin/portfolios', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          title: portfolioForm.title.trim(),
-          description: portfolioForm.description.trim(),
-          category: portfolioForm.category,
-          image: portfolioForm.image.trim() || null,
-          url: portfolioForm.url.trim() || null,
-          duration: portfolioForm.duration.trim() || '7 hari',
-          client: portfolioForm.client.trim() || null,
-          testimonial: portfolioForm.testimonial.trim() || null,
-          rating: portfolioForm.rating,
-          features: portfolioForm.features,
-          featured: portfolioForm.featured,
-          active: portfolioForm.active,
-          status: portfolioForm.status,
-        }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        setProjectNotice(data?.error ?? 'Gagal menyimpan portofolio.');
-        return;
-      }
-
-      const newProject = normalizePortfolioItem(data.portfolio);
-      setPortfolioItems((prev) => [newProject, ...prev]);
-      setPortfolioForm(defaultPortfolioForm());
-      setProjectNotice('Proyek baru siap tampil di portofolio.');
-    } catch (error) {
-      setProjectNotice(
-        error instanceof Error ? error.message : 'Terjadi kesalahan saat menghubungi server.',
-      );
-    } finally {
-      setIsSubmitting((prev) => ({ ...prev, portfolio: false }));
-    }
+  const handleDeleteCancel = () => {
+    setDeleteTarget(null);
+    setDeleteError(null);
   };
 
   const handleLogout = async () => {
-    setIsSubmitting((prev) => ({ ...prev, logout: true }));
+    setIsLoggingOut(true);
     try {
       await fetch('/api/admin/logout', { method: 'POST' });
       router.replace('/admin/login');
-    } catch (err) {
-      setFetchError(err instanceof Error ? err.message : 'Gagal keluar dari sesi admin.');
+    } catch (error) {
+      setFetchError(error instanceof Error ? error.message : 'Gagal keluar dari sesi admin.');
     } finally {
-      setIsSubmitting((prev) => ({ ...prev, logout: false }));
+      setIsLoggingOut(false);
     }
   };
 
-  const sectionTabs = [
-    { key: 'overview' as const, label: 'Overview', icon: LayoutDashboard },
-    { key: 'blog' as const, label: 'Blog Studio', icon: NotebookPen },
-    { key: 'portfolio' as const, label: 'Portofolio', icon: Layers3 },
+  const sectionTabs: { key: SectionKey; label: string; icon: typeof LayoutDashboard }[] = [
+    { key: 'overview', label: 'Overview', icon: LayoutDashboard },
+    { key: 'blog', label: 'Blog Studio', icon: NotebookPen },
+    { key: 'portfolio', label: 'Portofolio', icon: Layers3 },
   ];
 
   return (
@@ -528,24 +333,23 @@ export default function AdminContentStudio() {
               Admin Studio
             </span>
             <h1 className="mt-4 text-3xl font-semibold text-white md:text-4xl">
-              Konten & Portofolio Management
+              Konten &amp; Portofolio Management
             </h1>
             <p className="mt-2 max-w-2xl text-sm text-slate-400 md:text-base">
-              Atur artikel, studi kasus, dan showcase proyek Anda dengan panel modern terinspirasi
-              TailAdmin. Pantau performa dan publish konten hanya dengan beberapa klik.
+              Atur artikel, studi kasus, dan showcase proyek Anda dengan panel modern terinspirasi TailAdmin. Pantau performa dan publish konten hanya dengan beberapa klik.
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-3 self-start">
             <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-300 backdrop-blur">
               <CircleCheck className="h-4 w-4 text-emerald-400" />
-              Semua sistem beroperasi • Sinkronisasi Realtime
+              Semua sistem beroperasi - Sinkronisasi Realtime
             </div>
             <button
               onClick={handleLogout}
-              disabled={isSubmitting.logout}
+              disabled={isLoggingOut}
               className="rounded-2xl border border-white/10 bg-transparent px-4 py-3 text-sm font-medium text-slate-200 transition-all hover:border-[#f87171] hover:text-white disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {isSubmitting.logout ? 'Keluar...' : 'Keluar'}
+              {isLoggingOut ? 'Keluar...' : 'Keluar'}
             </button>
           </div>
         </header>
@@ -572,7 +376,7 @@ export default function AdminContentStudio() {
               </div>
             </div>
             <p className="mt-5 text-xs uppercase tracking-[0.3em] text-slate-400">
-              {metrics.publishedBlog} publish • {metrics.draftBlog} draft
+              {metrics.publishedBlog} publish - {metrics.draftBlog} draft
             </p>
           </div>
 
@@ -587,7 +391,7 @@ export default function AdminContentStudio() {
               </div>
             </div>
             <p className="mt-5 text-xs uppercase tracking-[0.3em] text-slate-400">
-              {metrics.completed} selesai • {metrics.ongoing} aktif
+              {metrics.completed} selesai - {metrics.ongoing} aktif
             </p>
           </div>
 
@@ -601,7 +405,7 @@ export default function AdminContentStudio() {
                 <Rocket className="h-5 w-5" />
               </div>
             </div>
-            <p className="mt-5 text-xs uppercase tracking-[0.3em] text-slate-400">30d growth • +18%</p>
+            <p className="mt-5 text-xs uppercase tracking-[0.3em] text-slate-400">30d growth - +18%</p>
           </div>
 
           <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-amber-500/20 via-orange-500/10 to-transparent p-6 backdrop-blur">
@@ -638,710 +442,570 @@ export default function AdminContentStudio() {
           })}
         </nav>
 
-        {activeSection === 'overview' && (
-          <section className="grid grid-cols-1 gap-6 xl:grid-cols-3">
-            <motion.div
+        <div className="rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur">
+          {activeSection === 'overview' && (
+            <motion.section
+              key="overview"
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.05 }}
-              className="xl:col-span-2 rounded-3xl border border-white/10 bg-white/5 p-8 backdrop-blur"
+              transition={{ duration: 0.25 }}
+              className="grid gap-6 lg:grid-cols-[1.4fr,1fr]"
             >
-              <div className="flex items-center justify-between">
-                <div>
-                  <h2 className="text-2xl font-semibold text-white">Artikel performa terbaik</h2>
-                  <p className="text-sm text-slate-400">Tiga artikel dengan engagement tertinggi minggu ini.</p>
-                </div>
-                <span className="inline-flex items-center gap-2 rounded-full border border-white/10 px-4 py-1 text-xs uppercase tracking-[0.3em] text-slate-400">
-                  <Rocket className="h-3.5 w-3.5" />
-                  Growth
-                </span>
-              </div>
-
-              <div className="mt-8 grid grid-cols-1 gap-4 md:grid-cols-3">
-                {topArticles.map((post, index) => (
-                  <div
-                    key={post.id}
-                    className="relative overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-white/10 via-transparent to-white/5 p-6"
-                  >
-                    <span className="flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/10 text-sm font-semibold text-white/80">
-                      #{index + 1}
-                    </span>
-                    <h3 className="mt-5 text-lg font-semibold text-white">{post.title}</h3>
-                    <p className="mt-3 text-sm text-slate-300 line-clamp-3">{post.excerpt ?? 'Belum ada ringkasan yang ditulis.'}</p>
-                    <div className="mt-6 flex items-center justify-between text-xs text-slate-400">
-                      <span className="inline-flex items-center gap-1">
-                        <Calendar className="h-4 w-4" />
-                        {formatDate(post.publishedAt)}
-                      </span>
-                      <span className="inline-flex items-center gap-1 text-emerald-400">
-                        <Rocket className="h-4 w-4" />
-                        {post.views.toLocaleString('id-ID')} views
-                      </span>
-                    </div>
-                  </div>
-                ))}
-
-                {!topArticles.length && (
-                  <div className="col-span-1 flex flex-col items-center justify-center rounded-2xl border border-dashed border-white/10 bg-white/5 p-6 text-center text-sm text-slate-400 md:col-span-3">
-                    Belum ada artikel yang dipublikasikan.
-                  </div>
-                )}
-              </div>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 }}
-              className="rounded-3xl border border-white/10 bg-white/5 p-8 backdrop-blur"
-            >
-              <h2 className="text-2xl font-semibold text-white">Aktivitas terbaru</h2>
-              <p className="mt-1 text-sm text-slate-400">Timeline gabungan blog & portofolio.</p>
-
-              <div className="mt-6 space-y-5">
-                {activityFeed.length === 0 && (
-                  <div className="rounded-2xl border border-dashed border-white/10 bg-white/5 p-6 text-sm text-slate-400">
-                    Belum ada aktivitas terbaru. Mulai dengan menambah konten baru.
-                  </div>
-                )}
-
-                {activityFeed.map((item) => (
-                  <div key={item.id} className="flex items-start gap-3 border-l border-white/10 pl-4">
-                    <div className="mt-1 h-2.5 w-2.5 rounded-full bg-gradient-to-tr from-[#6366f1] to-[#a855f7]" />
+              <div className="space-y-6">
+                <section className="rounded-2xl border border-white/10 bg-[#0c1224]/80 p-6 shadow-inner shadow-black/40">
+                  <div className="flex items-center justify-between gap-4">
                     <div>
-                      <p className="text-sm font-semibold text-white">{item.title}</p>
-                      <p className="mt-1 text-xs uppercase tracking-[0.3em] text-slate-400">
-                        {item.type === 'blog' ? 'Blog' : 'Portfolio'} • {item.status}
-                      </p>
-                      <span className="mt-1 inline-flex items-center gap-2 text-xs text-slate-400">
-                        <Calendar className="h-3.5 w-3.5" />
-                        {formatDate(item.date)}
-                      </span>
+                      <h2 className="text-lg font-semibold text-white">Performa Artikel</h2>
+                      <p className="mt-1 text-sm text-slate-400">Tiga artikel terpopuler berdasarkan jumlah views.</p>
                     </div>
+                    <span className="rounded-full border border-emerald-400/30 bg-emerald-400/10 px-3 py-1 text-xs font-semibold text-emerald-200">
+                      {metrics.totalViews.toLocaleString('id-ID')} total views
+                    </span>
                   </div>
-                ))}
-              </div>
-            </motion.div>
-          </section>
-        )}
-
-        {activeSection === 'blog' && (
-          <section className="grid grid-cols-1 gap-6 xl:grid-cols-5">
-            <motion.div
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.05 }}
-              className="xl:col-span-2 rounded-3xl border border-white/10 bg-gradient-to-br from-white/10 via-white/5 to-transparent p-8 backdrop-blur"
-            >
-              <div className="flex items-center justify-between">
-                <div>
-                  <h2 className="text-2xl font-semibold text-white">Tambah artikel baru</h2>
-                  <p className="text-sm text-slate-400">Siapkan konten blog dengan metadata lengkap.</p>
-                </div>
-                <NotebookPen className="h-6 w-6 text-indigo-300" />
-              </div>
-
-              <form className="mt-8 space-y-5" onSubmit={handleBlogSubmit}>
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-white" htmlFor="blog-title">
-                    Judul artikel
-                  </label>
-                  <input
-                    id="blog-title"
-                    value={blogForm.title}
-                    disabled={isSubmitting.blog}
-                    onChange={(event) => setBlogForm((prev) => ({ ...prev, title: event.target.value }))}
-                    placeholder="Contoh: Blueprint strategi konten Q1"
-                    className="w-full rounded-2xl border border-white/10 bg-[#0b1224]/70 px-4 py-3 text-sm text-white placeholder:text-slate-500 focus:border-[#6366f1] focus:outline-none focus:ring-2 focus:ring-[#6366f1]/40 disabled:cursor-not-allowed disabled:opacity-60"
-                  />
-                </div>
-
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium text-white" htmlFor="blog-category">
-                      Kategori utama
-                    </label>
-                    <select
-                      id="blog-category"
-                      value={blogForm.category}
-                      disabled={isSubmitting.blog}
-                      onChange={(event) => setBlogForm((prev) => ({ ...prev, category: event.target.value }))}
-                      className="w-full rounded-2xl border border-white/10 bg-[#0b1224]/70 px-4 py-3 text-sm text-white focus:border-[#6366f1] focus:outline-none focus:ring-2 focus:ring-[#6366f1]/40 disabled:cursor-not-allowed disabled:opacity-60"
-                    >
-                      {blogCategories.map((category) => (
-                        <option key={category} value={category}>
-                          {category}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium text-white" htmlFor="blog-date">
-                      Tanggal publish
-                    </label>
-                    <input
-                      type="date"
-                      id="blog-date"
-                      value={blogForm.publishedAt}
-                      disabled={isSubmitting.blog}
-                      onChange={(event) => setBlogForm((prev) => ({ ...prev, publishedAt: event.target.value }))}
-                      className="w-full rounded-2xl border border-white/10 bg-[#0b1224]/70 px-4 py-3 text-sm text-white focus:border-[#6366f1] focus:outline-none focus:ring-2 focus:ring-[#6366f1]/40 disabled:cursor-not-allowed disabled:opacity-60"
-                    />
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-white" htmlFor="blog-summary">
-                    Ringkasan singkat
-                  </label>
-                  <textarea
-                    id="blog-summary"
-                    value={blogForm.summary}
-                    disabled={isSubmitting.blog}
-                    onChange={(event) => setBlogForm((prev) => ({ ...prev, summary: event.target.value }))}
-                    rows={3}
-                    placeholder="Tulis fokus utama artikel untuk membantu pembaca dan SEO."
-                    className="w-full rounded-2xl border border-white/10 bg-[#0b1224]/70 px-4 py-3 text-sm text-white placeholder:text-slate-500 focus:border-[#6366f1] focus:outline-none focus:ring-2 focus:ring-[#6366f1]/40 disabled:cursor-not-allowed disabled:opacity-60"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-white" htmlFor="blog-content">
-                    Konten utama
-                  </label>
-                  <textarea
-                    id="blog-content"
-                    value={blogForm.content}
-                    disabled={isSubmitting.blog}
-                    onChange={(event) => setBlogForm((prev) => ({ ...prev, content: event.target.value }))}
-                    rows={6}
-                    placeholder="Masukkan konten lengkap artikel (markdown/html sederhana)."
-                    className="w-full rounded-2xl border border-white/10 bg-[#0b1224]/70 px-4 py-3 text-sm text-white placeholder:text-slate-500 focus:border-[#6366f1] focus:outline-none focus:ring-2 focus:ring-[#6366f1]/40 disabled:cursor-not-allowed disabled:opacity-60"
-                  />
-                </div>
-
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium text-white" htmlFor="blog-readtime">
-                      Estimasi baca
-                    </label>
-                    <input
-                      id="blog-readtime"
-                      value={blogForm.readTime}
-                      disabled={isSubmitting.blog}
-                      onChange={(event) => setBlogForm((prev) => ({ ...prev, readTime: event.target.value }))}
-                      placeholder="Contoh: 6 menit"
-                      className="w-full rounded-2xl border border-white/10 bg-[#0b1224]/70 px-4 py-3 text-sm text-white placeholder:text-slate-500 focus:border-[#6366f1] focus:outline-none focus:ring-2 focus:ring-[#6366f1]/40 disabled:cursor-not-allowed disabled:opacity-60"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium text-white" htmlFor="blog-status">
-                      Status konten
-                    </label>
-                    <select
-                      id="blog-status"
-                      value={blogForm.status}
-                      disabled={isSubmitting.blog}
-                      onChange={(event) =>
-                        setBlogForm((prev) => ({ ...prev, status: event.target.value as BlogStatus }))
-                      }
-                      className="w-full rounded-2xl border border-white/10 bg-[#0b1224]/70 px-4 py-3 text-sm text-white focus:border-[#6366f1] focus:outline-none focus:ring-2 focus:ring-[#6366f1]/40 disabled:cursor-not-allowed disabled:opacity-60"
-                    >
-                      <option value="draft">Draft</option>
-                      <option value="published">Published</option>
-                    </select>
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium text-white" htmlFor="blog-cover">
-                      Visual cover
-                    </label>
-                    <input
-                      id="blog-cover"
-                      value={blogForm.image}
-                      disabled={isSubmitting.blog}
-                      onChange={(event) => setBlogForm((prev) => ({ ...prev, image: event.target.value }))}
-                      placeholder="Contoh: gradient-nebula.png"
-                      className="w-full rounded-2xl border border-white/10 bg-[#0b1224]/70 px-4 py-3 text-sm text-white placeholder:text-slate-500 focus:border-[#6366f1] focus:outline-none focus:ring-2 focus:ring-[#6366f1]/40 disabled:cursor-not-allowed disabled:opacity-60"
-                    />
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-white" htmlFor="blog-tags">
-                    Tags (pisahkan dengan koma)
-                  </label>
-                  <div className="relative">
-                    <Tag className="pointer-events-none absolute left-3 top-3 h-4 w-4 text-slate-500" />
-                    <input
-                      id="blog-tags"
-                      value={blogForm.tags}
-                      disabled={isSubmitting.blog}
-                      onChange={(event) => setBlogForm((prev) => ({ ...prev, tags: event.target.value }))}
-                      placeholder="design system, onboarding, ux research"
-                      className="w-full rounded-2xl border border-white/10 bg-[#0b1224]/70 px-4 py-3 pl-10 text-sm text-white placeholder:text-slate-500 focus:border-[#6366f1] focus:outline-none focus:ring-2 focus:ring-[#6366f1]/40 disabled:cursor-not-allowed disabled:opacity-60"
-                    />
-                  </div>
-                </div>
-
-                <div className="flex items-center justify-between gap-4">
-                  <label className="flex items-center gap-3 text-sm text-slate-300">
-                    <input
-                      type="checkbox"
-                      checked={blogForm.featured}
-                      disabled={isSubmitting.blog}
-                      onChange={(event) => setBlogForm((prev) => ({ ...prev, featured: event.target.checked }))}
-                      className="h-4 w-4 rounded border border-white/10 bg-[#0b1224]/70 text-[#6366f1] focus:ring-[#6366f1]/60"
-                    />
-                    Tandai sebagai artikel highlight
-                  </label>
-                  <button
-                    type="submit"
-                    disabled={isSubmitting.blog}
-                    className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-[#6366f1] to-[#a855f7] px-5 py-3 text-sm font-semibold text-white shadow-[0_18px_45px_rgba(99,102,241,0.35)] transition-transform hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-60"
-                  >
-                    <Sparkles className="h-4 w-4" />
-                    {isSubmitting.blog ? 'Menyimpan...' : 'Publish ke staging'}
-                  </button>
-                </div>
-
-                {blogNotice && (
-                  <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-xs text-slate-200">
-                    <CircleCheck className="h-4 w-4 text-emerald-400" />
-                    {blogNotice}
-                  </div>
-                )}
-              </form>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 }}
-              className="xl:col-span-3 rounded-3xl border border-white/10 bg-white/5 p-8 backdrop-blur"
-            >
-              <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-                <div>
-                  <h2 className="text-2xl font-semibold text-white">Pipeline artikel</h2>
-                  <p className="text-sm text-slate-400">Pantau status, jadwal publish, dan highlight tag.</p>
-                </div>
-                <span className="rounded-full border border-white/10 px-4 py-1 text-xs uppercase tracking-[0.3em] text-slate-400">
-                  {blogPosts.length} total entri
-                </span>
-              </div>
-
-              <div className="mt-6 overflow-hidden rounded-2xl border border-white/10">
-                <table className="min-w-full divide-y divide-white/10 text-sm">
-                  <thead className="bg-white/5 text-left uppercase tracking-[0.3em] text-xs text-slate-400">
-                    <tr>
-                      <th className="px-4 py-4">Judul</th>
-                      <th className="px-4 py-4">Kategori</th>
-                      <th className="px-4 py-4">Status</th>
-                      <th className="px-4 py-4">Schedule</th>
-                      <th className="px-4 py-4">Views</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-white/10">
-                    {blogPosts.map((post) => (
-                      <tr key={post.id} className="bg-[#090f1f]/70 text-slate-200 hover:bg-[#101830]">
-                        <td className="px-4 py-4">
-                          <div className="flex flex-col gap-1">
-                            <span className="font-semibold text-white">{post.title}</span>
-                            <span className="text-xs text-slate-400">{post.excerpt ?? 'Belum ada ringkasan.'}</span>
-                            <div className="flex flex-wrap gap-2 pt-2">
-                              {post.tags.length === 0 && (
-                                <span className="rounded-full border border-dashed border-white/10 bg-white/5 px-2 py-0.5 text-[11px] text-slate-400">
-                                  Belum ada tag
-                                </span>
-                              )}
-                              {post.tags.map((tag) => (
-                                <span
-                                  key={tag}
-                                  className="inline-flex items-center gap-1 rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[11px] text-slate-300"
-                                >
-                                  <Tag className="h-3 w-3" />
-                                  {tag}
-                                </span>
-                              ))}
-                            </div>
+                  <div className="mt-5 space-y-4">
+                    {topArticles.length > 0 ? (
+                      topArticles.map((post) => (
+                        <div
+                          key={post.id}
+                          className="flex flex-col gap-2 rounded-xl border border-white/10 bg-white/[0.04] p-4 transition hover:border-[#6366f1]/60"
+                        >
+                          <div className="flex items-start justify-between gap-3">
+                            <p className="text-sm font-semibold text-white">{post.title}</p>
+                            <span className="rounded-full border border-emerald-400/30 bg-emerald-400/10 px-3 py-1 text-xs font-semibold text-emerald-200">
+                              {post.views.toLocaleString('id-ID')} views
+                            </span>
                           </div>
-                        </td>
-                        <td className="px-4 py-4 text-slate-300">{post.category}</td>
-                        <td className="px-4 py-4">
-                          <span
-                            className={`inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-medium ${
-                              post.published
-                                ? 'bg-emerald-500/10 text-emerald-300'
-                                : 'bg-slate-500/10 text-slate-300'
-                            }`}
-                          >
-                            <CircleCheck className="h-3.5 w-3.5" />
-                            {post.published ? 'Published' : 'Draft'}
-                          </span>
-                        </td>
-                        <td className="px-4 py-4 text-slate-300">{formatDate(post.publishedAt)}</td>
-                        <td className="px-4 py-4 text-emerald-300">{post.views.toLocaleString('id-ID')}</td>
-                      </tr>
-                    ))}
-
-                    {!blogPosts.length && (
-                      <tr>
-                        <td colSpan={5} className="px-4 py-6 text-center text-sm text-slate-400">
-                          Belum ada artikel yang terdaftar.
-                        </td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
-              </div>
-            </motion.div>
-          </section>
-        )}
-
-        {activeSection === 'portfolio' && (
-          <section className="grid grid-cols-1 gap-6 xl:grid-cols-5">
-            <motion.div
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.05 }}
-              className="xl:col-span-2 rounded-3xl border border-white/10 bg-gradient-to-br from-white/12 via-white/6 to-transparent p-8 backdrop-blur"
-            >
-              <div className="flex items-center justify-between">
-                <div>
-                  <h2 className="text-2xl font-semibold text-white">Tambah showcase baru</h2>
-                  <p className="text-sm text-slate-400">Display studi kasus dan highlight proyek unggulan.</p>
-                </div>
-                <Layers3 className="h-6 w-6 text-fuchsia-300" />
-              </div>
-
-              <form className="mt-8 space-y-5" onSubmit={handlePortfolioSubmit}>
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-white" htmlFor="project-title">
-                    Nama proyek
-                  </label>
-                  <input
-                    id="project-title"
-                    value={portfolioForm.title}
-                    disabled={isSubmitting.portfolio}
-                    onChange={(event) => setPortfolioForm((prev) => ({ ...prev, title: event.target.value }))}
-                    placeholder="Contoh: Revamp dashboard SaaS"
-                    className="w-full rounded-2xl border border-white/10 bg-[#0b1224]/70 px-4 py-3 text-sm text-white placeholder:text-slate-500 focus:border-[#a855f7] focus:outline-none focus:ring-2 focus:ring-[#a855f7]/40 disabled:cursor-not-allowed disabled:opacity-60"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-white" htmlFor="project-description">
-                    Deskripsi proyek
-                  </label>
-                  <textarea
-                    id="project-description"
-                    value={portfolioForm.description}
-                    disabled={isSubmitting.portfolio}
-                    onChange={(event) =>
-                      setPortfolioForm((prev) => ({ ...prev, description: event.target.value }))
-                    }
-                    rows={4}
-                    placeholder="Ceritakan tujuan, solusi, dan impact proyek."
-                    className="w-full rounded-2xl border border-white/10 bg-[#0b1224]/70 px-4 py-3 text-sm text-white placeholder:text-slate-500 focus:border-[#a855f7] focus:outline-none focus:ring-2 focus:ring-[#a855f7]/40 disabled:cursor-not-allowed disabled:opacity-60"
-                  />
-                </div>
-
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium text-white" htmlFor="project-category">
-                      Kategori proyek
-                    </label>
-                    <select
-                      id="project-category"
-                      value={portfolioForm.category}
-                      disabled={isSubmitting.portfolio}
-                      onChange={(event) => setPortfolioForm((prev) => ({ ...prev, category: event.target.value }))}
-                      className="w-full rounded-2xl border border-white/10 bg-[#0b1224]/70 px-4 py-3 text-sm text-white focus:border-[#a855f7] focus:outline-none focus:ring-2 focus:ring-[#a855f7]/40 disabled:cursor-not-allowed disabled:opacity-60"
-                    >
-                      {projectCategories.map((category) => (
-                        <option key={category} value={category}>
-                          {category}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium text-white" htmlFor="project-duration">
-                      Durasi pengerjaan
-                    </label>
-                    <input
-                      id="project-duration"
-                      value={portfolioForm.duration}
-                      disabled={isSubmitting.portfolio}
-                      onChange={(event) => setPortfolioForm((prev) => ({ ...prev, duration: event.target.value }))}
-                      placeholder="Contoh: 6 minggu"
-                      className="w-full rounded-2xl border border-white/10 bg-[#0b1224]/70 px-4 py-3 text-sm text-white placeholder:text-slate-500 focus:border-[#a855f7] focus:outline-none focus:ring-2 focus:ring-[#a855f7]/40 disabled:cursor-not-allowed disabled:opacity-60"
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium text-white" htmlFor="project-client">
-                      Klien
-                    </label>
-                    <input
-                      id="project-client"
-                      value={portfolioForm.client}
-                      disabled={isSubmitting.portfolio}
-                      onChange={(event) => setPortfolioForm((prev) => ({ ...prev, client: event.target.value }))}
-                      placeholder="Nama klien"
-                      className="w-full rounded-2xl border border-white/10 bg-[#0b1224]/70 px-4 py-3 text-sm text-white placeholder:text-slate-500 focus:border-[#a855f7] focus:outline-none focus:ring-2 focus:ring-[#a855f7]/40 disabled:cursor-not-allowed disabled:opacity-60"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium text-white" htmlFor="project-rating">
-                      Rating klien (1-5)
-                    </label>
-                    <input
-                      type="number"
-                      min="1"
-                      max="5"
-                      id="project-rating"
-                      value={portfolioForm.rating}
-                      disabled={isSubmitting.portfolio}
-                      onChange={(event) => setPortfolioForm((prev) => ({ ...prev, rating: event.target.value }))}
-                      className="w-full rounded-2xl border border-white/10 bg-[#0b1224]/70 px-4 py-3 text-sm text-white placeholder:text-slate-500 focus:border-[#a855f7] focus:outline-none focus:ring-2 focus:ring-[#a855f7]/40 disabled:cursor-not-allowed disabled:opacity-60"
-                    />
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-white" htmlFor="project-testimonial">
-                    Testimoni klien
-                  </label>
-                  <textarea
-                    id="project-testimonial"
-                    value={portfolioForm.testimonial}
-                    disabled={isSubmitting.portfolio}
-                    onChange={(event) =>
-                      setPortfolioForm((prev) => ({ ...prev, testimonial: event.target.value }))
-                    }
-                    rows={3}
-                    placeholder="Komentar atau testimoni singkat dari klien."
-                    className="w-full rounded-2xl border border-white/10 bg-[#0b1224]/70 px-4 py-3 text-sm text-white placeholder:text-slate-500 focus:border-[#a855f7] focus:outline-none focus:ring-2 focus:ring-[#a855f7]/40 disabled:cursor-not-allowed disabled:opacity-60"
-                  />
-                </div>
-
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium text-white" htmlFor="project-image">
-                      Visual preview
-                    </label>
-                    <div className="relative">
-                      <ImageIcon className="pointer-events-none absolute left-3 top-3 h-4 w-4 text-slate-500" />
-                      <input
-                        id="project-image"
-                        value={portfolioForm.image}
-                        disabled={isSubmitting.portfolio}
-                        onChange={(event) => setPortfolioForm((prev) => ({ ...prev, image: event.target.value }))}
-                        placeholder="Contoh: dashboard-alpha.png"
-                        className="w-full rounded-2xl border border-white/10 bg-[#0b1224]/70 px-4 py-3 pl-10 text-sm text-white placeholder:text-slate-500 focus:border-[#a855f7] focus:outline-none focus:ring-2 focus:ring-[#a855f7]/40 disabled:cursor-not-allowed disabled:opacity-60"
-                      />
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium text-white" htmlFor="project-link">
-                      URL proyek
-                    </label>
-                    <div className="relative">
-                      <LinkIcon className="pointer-events-none absolute left-3 top-3 h-4 w-4 text-slate-500" />
-                      <input
-                        id="project-link"
-                        value={portfolioForm.url}
-                        disabled={isSubmitting.portfolio}
-                        onChange={(event) => setPortfolioForm((prev) => ({ ...prev, url: event.target.value }))}
-                        placeholder="https://"
-                        className="w-full rounded-2xl border border-white/10 bg-[#0b1224]/70 px-4 py-3 pl-10 text-sm text-white placeholder:text-slate-500 focus:border-[#a855f7] focus:outline-none focus:ring-2 focus:ring-[#a855f7]/40 disabled:cursor-not-allowed disabled:opacity-60"
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-white" htmlFor="project-features">
-                    Highlight & stack (pisahkan dengan koma)
-                  </label>
-                  <div className="relative">
-                    <Globe className="pointer-events-none absolute left-3 top-3 h-4 w-4 text-slate-500" />
-                    <input
-                      id="project-features"
-                      value={portfolioForm.features}
-                      disabled={isSubmitting.portfolio}
-                      onChange={(event) => setPortfolioForm((prev) => ({ ...prev, features: event.target.value }))}
-                      placeholder="next.js, tailwind, cms, analytics"
-                      className="w-full rounded-2xl border border-white/10 bg-[#0b1224]/70 px-4 py-3 pl-10 text-sm text-white placeholder:text-slate-500 focus:border-[#a855f7] focus:outline-none focus:ring-2 focus:ring-[#a855f7]/40 disabled:cursor-not-allowed disabled:opacity-60"
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium text-white" htmlFor="project-status">
-                      Status proyek
-                    </label>
-                    <select
-                      id="project-status"
-                      value={portfolioForm.status}
-                      disabled={isSubmitting.portfolio}
-                      onChange={(event) =>
-                        setPortfolioForm((prev) => ({
-                          ...prev,
-                          status: event.target.value as ProjectStatus,
-                        }))
-                      }
-                      className="w-full rounded-2xl border border-white/10 bg-[#0b1224]/70 px-4 py-3 text-sm text-white focus:border-[#a855f7] focus:outline-none focus:ring-2 focus:ring-[#a855f7]/40 disabled:cursor-not-allowed disabled:opacity-60"
-                    >
-                      <option value="ongoing">Sedang berjalan</option>
-                      <option value="completed">Selesai</option>
-                    </select>
-                  </div>
-                  <div className="flex items-center gap-3 pt-6">
-                    <label className="flex items-center gap-3 text-sm text-slate-300">
-                      <input
-                        type="checkbox"
-                        checked={portfolioForm.active}
-                        disabled={isSubmitting.portfolio}
-                        onChange={(event) =>
-                          setPortfolioForm((prev) => ({ ...prev, active: event.target.checked }))
-                        }
-                        className="h-4 w-4 rounded border border-white/10 bg-[#0b1224]/70 text-[#a855f7] focus:ring-[#a855f7]/60"
-                      />
-                      Tampilkan di listing publik
-                    </label>
-                  </div>
-                </div>
-
-                <div className="flex items-center justify-between gap-4">
-                  <label className="flex items-center gap-3 text-sm text-slate-300">
-                    <input
-                      type="checkbox"
-                      checked={portfolioForm.featured}
-                      disabled={isSubmitting.portfolio}
-                      onChange={(event) =>
-                        setPortfolioForm((prev) => ({ ...prev, featured: event.target.checked }))
-                      }
-                      className="h-4 w-4 rounded border border-white/10 bg-[#0b1224]/70 text-[#a855f7] focus:ring-[#a855f7]/60"
-                    />
-                    Tampilkan sebagai highlight homepage
-                  </label>
-                  <button
-                    type="submit"
-                    disabled={isSubmitting.portfolio}
-                    className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-[#a855f7] to-[#ec4899] px-5 py-3 text-sm font-semibold text-white shadow-[0_18px_45px_rgba(168,85,247,0.35)] transition-transform hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-60"
-                  >
-                    <Sparkles className="h-4 w-4" />
-                    {isSubmitting.portfolio ? 'Menyimpan...' : 'Simpan showcase'}
-                  </button>
-                </div>
-
-                {projectNotice && (
-                  <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-xs text-slate-200">
-                    <CircleCheck className="h-4 w-4 text-emerald-400" />
-                    {projectNotice}
-                  </div>
-                )}
-              </form>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 }}
-              className="xl:col-span-3 rounded-3xl border border-white/10 bg-white/5 p-8 backdrop-blur"
-            >
-              <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-                <div>
-                  <h2 className="text-2xl font-semibold text-white">Daftar portofolio</h2>
-                  <p className="text-sm text-slate-400">Semua proyek terbaru beserta stack dan statusnya.</p>
-                </div>
-                <span className="rounded-full border border-white/10 px-4 py-1 text-xs uppercase tracking-[0.3em] text-slate-400">
-                  {portfolioItems.length} showcase aktif
-                </span>
-              </div>
-
-              <div className="mt-6 space-y-4">
-                {portfolioItems.map((item) => (
-                  <div
-                    key={item.id}
-                    className="rounded-2xl border border-white/10 bg-[#090f1f]/80 p-6 transition-colors hover:border-[#a855f7]/50"
-                  >
-                    <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
-                      <div className="space-y-3">
-                        <div className="flex flex-wrap items-center gap-3">
-                          <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs uppercase tracking-[0.3em] text-slate-400">
-                            {item.category}
-                          </span>
-                          {item.featured && (
-                            <span className="inline-flex items-center gap-2 rounded-full border border-amber-500/40 bg-amber-500/15 px-3 py-1 text-xs font-medium text-amber-200">
-                              <Star className="h-3.5 w-3.5" />
-                              Highlight
-                            </span>
-                          )}
-                          {!item.active && (
-                            <span className="inline-flex items-center gap-2 rounded-full border border-red-500/30 bg-red-500/10 px-3 py-1 text-xs font-medium text-red-200">
-                              Tidak aktif
-                            </span>
-                          )}
-                        </div>
-                        <h3 className="text-xl font-semibold text-white">{item.title}</h3>
-                        <p className="text-sm text-slate-400">{item.client ?? 'Klien internal'}</p>
-                        <p className="text-sm text-slate-300">{item.description}</p>
-                        <div className="flex flex-wrap gap-2 pt-2">
-                          {item.features.length === 0 && (
-                            <span className="rounded-full border border-dashed border-white/10 bg-white/5 px-2 py-0.5 text-[11px] text-slate-400">
-                              Belum ada highlight stack
-                            </span>
-                          )}
-                          {item.features.map((feature) => (
-                            <span
-                              key={feature}
-                              className="inline-flex items-center gap-1 rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[11px] text-slate-300"
-                            >
+                          <p className="text-xs text-slate-400">{post.excerpt ?? 'Belum ada ringkasan singkat.'}</p>
+                          <div className="flex flex-wrap items-center gap-3 text-[11px] uppercase tracking-wide text-slate-500">
+                            <span className="inline-flex items-center gap-1">
                               <Tag className="h-3 w-3" />
-                              {feature}
+                              {post.category}
                             </span>
-                          ))}
+                            <span className="inline-flex items-center gap-1">
+                              <Calendar className="h-3 w-3" />
+                              {formatDate(post.publishedAt ?? post.createdAt)}
+                            </span>
+                          </div>
                         </div>
+                      ))
+                    ) : (
+                      <div className="rounded-xl border border-dashed border-white/10 bg-white/[0.03] p-10 text-center text-sm text-slate-400">
+                        Belum ada data performa artikel.
                       </div>
-                      <div className="flex flex-col items-start gap-3 text-sm text-slate-300">
-                        <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-medium text-slate-200">
-                          {item.status === 'completed' ? 'Selesai' : 'Sedang berjalan'}
-                        </span>
-                        <span className="inline-flex items-center gap-2 text-xs text-slate-400">
-                          <Calendar className="h-3.5 w-3.5" />
-                          Dibuat {formatDate(item.createdAt)}
-                        </span>
-                        {item.url && (
-                          <a
-                            href={item.url}
-                            className="inline-flex items-center gap-2 text-xs font-medium text-[#a855f7] hover:text-[#f472b6]"
-                            target="_blank"
-                            rel="noreferrer"
+                    )}
+                  </div>
+                </section>
+
+                <section className="rounded-2xl border border-white/10 bg-[#0c1224]/80 p-6 shadow-inner shadow-black/40">
+                  <div className="flex items-center justify-between gap-4">
+                    <div>
+                      <h2 className="text-lg font-semibold text-white">Antrian Publikasi</h2>
+                      <p className="mt-1 text-sm text-slate-400">Draft yang siap dipoles sebelum tayang.</p>
+                    </div>
+                    <span className="rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs font-semibold text-slate-200">
+                      {metrics.draftBlog} draft
+                    </span>
+                  </div>
+                  <div className="mt-5 space-y-4">
+                    {scheduledPosts.length > 0 ? (
+                      scheduledPosts.map((post) => (
+                        <div
+                          key={post.id}
+                          className="flex items-center justify-between gap-4 rounded-xl border border-white/10 bg-white/[0.05] p-4"
+                        >
+                          <div>
+                            <p className="text-sm font-semibold text-white">{post.title}</p>
+                            <p className="text-xs text-slate-400">Target terbit {formatDate(post.publishedAt ?? post.createdAt)}</p>
+                          </div>
+                          <button
+                            onClick={() => handleBlogEdit(post.id)}
+                            className="inline-flex items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-xs font-medium text-slate-200 transition hover:border-[#6366f1] hover:text-white"
                           >
-                            <LinkIcon className="h-3.5 w-3.5" />
-                            Lihat proyek
-                          </a>
+                            <Pencil className="h-3.5 w-3.5" />
+                            Selesaikan
+                          </button>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="rounded-xl border border-dashed border-white/10 bg-white/[0.03] p-10 text-center text-sm text-slate-400">
+                        Semua artikel sudah terbit. Gunakan tombol Tambahkan untuk membuat konten baru.
+                      </div>
+                    )}
+                  </div>
+                </section>
+              </div>
+
+              <div className="space-y-6">
+                <section className="rounded-2xl border border-white/10 bg-[#0c1224]/80 p-6 shadow-inner shadow-black/40">
+                  <div className="flex items-center justify-between gap-4">
+                    <div>
+                      <h2 className="text-lg font-semibold text-white">Aktivitas Terbaru</h2>
+                      <p className="mt-1 text-sm text-slate-400">Rekap singkat perpindahan status konten.</p>
+                    </div>
+                    <span className="rounded-full border border-[#38bdf8]/30 bg-[#38bdf8]/10 px-3 py-1 text-xs font-semibold text-[#bae6fd]">
+                      {activityFeed.length} aktivitas
+                    </span>
+                  </div>
+                  <div className="mt-5 space-y-4">
+                    {activityFeed.length > 0 ? (
+                      activityFeed.map((activity) => (
+                        <div
+                          key={activity.id}
+                          className="flex items-start gap-4 rounded-xl border border-white/10 bg-white/[0.03] p-4"
+                        >
+                          <div
+                            className={`mt-1 h-2.5 w-2.5 rounded-full ${activity.type === 'blog' ? 'bg-[#6366f1]' : 'bg-[#22d3ee]'}`}
+                          />
+                          <div>
+                            <p className="text-sm font-semibold text-white">{activity.title}</p>
+                            <p className="text-xs text-slate-400">{activity.status} - {formatDate(activity.date)}</p>
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="rounded-xl border border-dashed border-white/10 bg-white/[0.03] p-10 text-center text-sm text-slate-400">
+                        Belum ada aktivitas terbaru.
+                      </div>
+                    )}
+                  </div>
+                </section>
+
+                <section className="rounded-2xl border border-white/10 bg-[#0c1224]/80 p-6 shadow-inner shadow-black/40">
+                  <div className="flex items-start justify-between gap-4">
+                    <div>
+                      <h2 className="text-lg font-semibold text-white">Portofolio Unggulan</h2>
+                      <p className="mt-1 text-sm text-slate-400">Highlight dan proyek yang masih berjalan.</p>
+                    </div>
+                    <span className="rounded-full border border-[#facc15]/30 bg-[#facc15]/10 px-3 py-1 text-xs font-semibold text-[#fde68a]">
+                      {metrics.featuredPortfolio} highlight
+                    </span>
+                  </div>
+                  <div className="mt-5 space-y-6">
+                    <div>
+                      <h3 className="text-sm font-semibold text-slate-200">Highlight</h3>
+                      <div className="mt-3 space-y-4">
+                        {highlightedProjects.length > 0 ? (
+                          highlightedProjects.map((project) => (
+                            <div
+                              key={project.id}
+                              className="flex flex-col gap-3 rounded-xl border border-white/10 bg-white/[0.04] p-4"
+                            >
+                              <div className="flex items-center justify-between gap-3">
+                                <p className="text-sm font-semibold text-white">{project.title}</p>
+                                {project.url && (
+                                  <a
+                                    href={project.url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="inline-flex items-center gap-1 text-xs text-sky-300 transition hover:text-white"
+                                  >
+                                    <LinkIcon className="h-3.5 w-3.5" />
+                                    Kunjungi
+                                  </a>
+                                )}
+                              </div>
+                              <div className="flex flex-wrap items-center gap-3 text-xs text-slate-400">
+                                <span className="inline-flex items-center gap-1">
+                                  <Layers3 className="h-3 w-3" />
+                                  {project.category}
+                                </span>
+                                <span className="inline-flex items-center gap-1">
+                                  <Calendar className="h-3 w-3" />
+                                  {formatDate(project.updatedAt)}
+                                </span>
+                              </div>
+                              <p className="text-xs text-slate-400 line-clamp-2">{project.description}</p>
+                            </div>
+                          ))
+                        ) : (
+                          <div className="rounded-xl border border-dashed border-white/10 bg-white/[0.03] p-10 text-center text-sm text-slate-400">
+                            Tandai proyek sebagai highlight untuk ditampilkan di sini.
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    <div>
+                      <h3 className="text-sm font-semibold text-slate-200">Sedang berjalan</h3>
+                      <div className="mt-3 space-y-4">
+                        {activeProjects.length > 0 ? (
+                          activeProjects.map((project) => (
+                            <div
+                              key={`active-${project.id}`}
+                              className="flex items-center justify-between gap-3 rounded-xl border border-white/10 bg-white/[0.04] p-4"
+                            >
+                              <div>
+                                <p className="text-sm font-semibold text-white">{project.title}</p>
+                                <p className="text-xs text-slate-400">Durasi {project.duration}</p>
+                              </div>
+                              <span className="rounded-full border border-sky-400/40 bg-sky-400/10 px-3 py-1 text-xs font-semibold text-sky-200">
+                                {project.status === 'completed' ? 'Selesai' : 'On-going'}
+                              </span>
+                            </div>
+                          ))
+                        ) : (
+                          <div className="rounded-xl border border-dashed border-white/10 bg-white/[0.03] p-10 text-center text-sm text-slate-400">
+                            Belum ada proyek aktif saat ini.
+                          </div>
                         )}
                       </div>
                     </div>
                   </div>
-                ))}
+                </section>
+              </div>
+            </motion.section>
+          )}
 
-                {!portfolioItems.length && (
-                  <div className="rounded-2xl border border-dashed border-white/10 bg-[#090f1f]/60 p-6 text-center text-sm text-slate-400">
-                    Belum ada portofolio yang terdaftar.
+                  {activeSection === 'blog' && (
+            <motion.section
+              key="blog"
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.25 }}
+              className="space-y-6"
+            >
+              <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+                <div>
+                  <h2 className="text-xl font-semibold text-white">Blog Studio</h2>
+                  <p className="text-sm text-slate-400">Kelola artikel, publish insight, dan pantau performanya.</p>
+                </div>
+                <button
+                  onClick={handleBlogAddClick}
+                  className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-[#6366f1] to-[#7c3aed] px-5 py-2.5 text-sm font-semibold text-white shadow-[0_12px_30px_rgba(94,97,255,0.35)] transition hover:brightness-110"
+                >
+                  <Plus className="h-4 w-4" />
+                  Tambahkan artikel
+                </button>
+              </div>
+
+              <div className="overflow-hidden rounded-2xl border border-white/10 bg-[#0c1224]/80 shadow-inner shadow-black/40">
+                {blogPosts.length > 0 ? (
+                  <table className="min-w-full divide-y divide-white/10 text-sm text-slate-200">
+                    <thead className="bg-white/[0.04] text-xs uppercase tracking-wide text-slate-400">
+                      <tr>
+                        <th className="px-6 py-4 text-left font-semibold">Judul &amp; Ringkasan</th>
+                        <th className="px-6 py-4 text-left font-semibold">Kategori</th>
+                        <th className="px-6 py-4 text-left font-semibold">Status</th>
+                        <th className="px-6 py-4 text-left font-semibold">Views</th>
+                        <th className="px-6 py-4 text-left font-semibold">Terbit</th>
+                        <th className="px-6 py-4 text-right font-semibold">Aksi</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-white/10">
+                      {blogPosts.map((post) => {
+                        const isMenuOpen = actionMenu?.type === 'blog' && actionMenu.id === post.id;
+                        return (
+                          <tr key={post.id} className="transition hover:bg-white/[0.03]">
+                            <td className="px-6 py-5 align-top">
+                              <div className="flex flex-col gap-2">
+                                <span className="text-sm font-semibold text-white">{post.title}</span>
+                                <span className="text-xs text-slate-400 line-clamp-2">{post.excerpt ?? 'Belum ada ringkasan singkat.'}</span>
+                                {post.tags.length > 0 && (
+                                  <div className="flex flex-wrap gap-2">
+                                    {post.tags.slice(0, 3).map((tag) => (
+                                      <span
+                                        key={tag}
+                                        className="inline-flex items-center gap-1 rounded-full bg-white/5 px-2.5 py-1 text-[11px] text-slate-300"
+                                      >
+                                        <Tag className="h-3 w-3" />
+                                        {tag}
+                                      </span>
+                                    ))}
+                                  </div>
+                                )}
+                              </div>
+                            </td>
+                            <td className="px-6 py-5 align-top text-sm text-slate-300">{post.category}</td>
+                            <td className="px-6 py-5 align-top">
+                              <span
+                                className={`inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold ${
+                                  post.published
+                                    ? 'border border-emerald-400/40 bg-emerald-400/10 text-emerald-200'
+                                    : 'border border-amber-400/40 bg-amber-400/10 text-amber-200'
+                                }`}
+                              >
+                                <span className="h-2 w-2 rounded-full bg-current" />
+                                {post.published ? 'Published' : 'Draft'}
+                              </span>
+                            </td>
+                            <td className="px-6 py-5 align-top text-sm text-slate-300">{post.views.toLocaleString('id-ID')}</td>
+                            <td className="px-6 py-5 align-top text-sm text-slate-300">{formatDate(post.publishedAt ?? post.createdAt)}</td>
+                            <td className="relative px-6 py-5 align-top text-right" data-menu-container="true">
+                              <div className="flex justify-end">
+                                <button
+                                  onClick={() => toggleActionMenu('blog', post.id)}
+                                  className="inline-flex items-center justify-center rounded-full border border-white/10 bg-white/10 p-2 text-slate-200 transition hover:border-[#6366f1] hover:text-white"
+                                  aria-label={`Aksi untuk ${post.title}`}
+                                >
+                                  <EllipsisVertical className="h-4 w-4" />
+                                </button>
+                              </div>
+                              {isMenuOpen && (
+                                <div className="absolute right-6 top-16 z-20 w-44 overflow-hidden rounded-xl border border-white/10 bg-[#0c1224] shadow-lg shadow-black/40">
+                                  <button
+                                    onClick={() => handleBlogEdit(post.id)}
+                                    className="flex w-full items-center gap-2 px-4 py-3 text-left text-sm text-slate-200 transition hover:bg-white/5"
+                                  >
+                                    <Pencil className="h-4 w-4" />
+                                    Edit konten
+                                  </button>
+                                  <button
+                                    onClick={() => handleDeleteRequest('blog', post.id, post.title)}
+                                    className="flex w-full items-center gap-2 px-4 py-3 text-left text-sm text-red-300 transition hover:bg-red-500/10"
+                                  >
+                                    <Trash2 className="h-4 w-4" />
+                                    Hapus
+                                  </button>
+                                </div>
+                              )}
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                ) : (
+                  <div className="flex flex-col items-center justify-center gap-4 px-10 py-16 text-center">
+                    <NotebookPen className="h-10 w-10 text-slate-400" />
+                    <div className="space-y-1">
+                      <p className="text-sm font-semibold text-white">Belum ada artikel</p>
+                      <p className="text-sm text-slate-400">Mulai bagikan cerita dan insight terbaru Anda.</p>
+                    </div>
+                    <button
+                      onClick={handleBlogAddClick}
+                      className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-[#6366f1] to-[#7c3aed] px-4 py-2 text-sm font-semibold text-white shadow-[0_12px_30px_rgba(94,97,255,0.35)] transition hover:brightness-110"
+                    >
+                      <Plus className="h-4 w-4" />
+                      Tambahkan artikel
+                    </button>
                   </div>
                 )}
               </div>
-            </motion.div>
-          </section>
+            </motion.section>
+          )}
+
+        </div>
+
+        {activeSection === 'portfolio' && (
+            <motion.section
+              key="portfolio"
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.25 }}
+              className="space-y-6"
+            >
+              <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+                <div>
+                  <h2 className="text-xl font-semibold text-white">Portofolio</h2>
+                  <p className="text-sm text-slate-400">Kurasi studi kasus dan showcase proyek terbaik Anda.</p>
+                </div>
+                <button
+                  onClick={handlePortfolioAddClick}
+                  className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-[#06b6d4] to-[#2563eb] px-5 py-2.5 text-sm font-semibold text-white shadow-[0_12px_30px_rgba(14,165,233,0.35)] transition hover:brightness-110"
+                >
+                  <Plus className="h-4 w-4" />
+                  Tambahkan portofolio
+                </button>
+              </div>
+
+              <div className="overflow-hidden rounded-2xl border border-white/10 bg-[#0c1224]/80 shadow-inner shadow-black/40">
+                {portfolioItems.length > 0 ? (
+                  <table className="min-w-full divide-y divide-white/10 text-sm text-slate-200">
+                    <thead className="bg-white/[0.04] text-xs uppercase tracking-wide text-slate-400">
+                      <tr>
+                        <th className="px-6 py-4 text-left font-semibold">Proyek</th>
+                        <th className="px-6 py-4 text-left font-semibold">Kategori</th>
+                        <th className="px-6 py-4 text-left font-semibold">Status</th>
+                        <th className="px-6 py-4 text-left font-semibold">Durasi</th>
+                        <th className="px-6 py-4 text-left font-semibold">Aktif</th>
+                        <th className="px-6 py-4 text-right font-semibold">Aksi</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-white/10">
+                      {portfolioItems.map((item) => {
+                        const isMenuOpen = actionMenu?.type === 'portfolio' && actionMenu.id === item.id;
+                        return (
+                          <tr key={item.id} className="transition hover:bg-white/[0.03]">
+                            <td className="px-6 py-5 align-top">
+                              <div className="flex flex-col gap-2">
+                                <span className="text-sm font-semibold text-white">{item.title}</span>
+                                <p className="text-xs text-slate-400 line-clamp-2">{item.description}</p>
+                                {item.features.length > 0 && (
+                                  <div className="flex flex-wrap gap-2">
+                                    {item.features.slice(0, 3).map((feature) => (
+                                      <span
+                                        key={feature}
+                                        className="inline-flex items-center gap-1 rounded-full bg-white/5 px-2.5 py-1 text-[11px] text-slate-300"
+                                      >
+                                        <Sparkles className="h-3 w-3 text-sky-300" />
+                                        {feature}
+                                      </span>
+                                    ))}
+                                  </div>
+                                )}
+                                {item.client && <span className="text-[11px] text-slate-400">Klien: {item.client}</span>}
+                                {item.url && (
+                                  <a
+                                    href={item.url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="inline-flex items-center gap-1 text-xs text-sky-300 transition hover:text-white"
+                                  >
+                                    <LinkIcon className="h-3.5 w-3.5" />
+                                    Lihat preview
+                                  </a>
+                                )}
+                              </div>
+                            </td>
+                            <td className="px-6 py-5 align-top text-sm text-slate-300">{item.category}</td>
+                            <td className="px-6 py-5 align-top">
+                              <span
+                                className={`inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold ${
+                                  item.status === 'completed'
+                                    ? 'border border-emerald-400/40 bg-emerald-400/10 text-emerald-200'
+                                    : 'border border-sky-400/40 bg-sky-400/10 text-sky-200'
+                                }`}
+                              >
+                                <span className="h-2 w-2 rounded-full bg-current" />
+                                {item.status === 'completed' ? 'Selesai' : 'Sedang berjalan'}
+                              </span>
+                            </td>
+                            <td className="px-6 py-5 align-top text-sm text-slate-300">{item.duration}</td>
+                            <td className="px-6 py-5 align-top">
+                              <span
+                                className={`inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold ${
+                                  item.active
+                                    ? 'border border-emerald-400/40 bg-emerald-400/10 text-emerald-200'
+                                    : 'border border-red-400/40 bg-red-400/10 text-red-200'
+                                }`}
+                              >
+                                <span className="h-2 w-2 rounded-full bg-current" />
+                                {item.active ? 'Aktif' : 'Nonaktif'}
+                              </span>
+                            </td>
+                            <td className="relative px-6 py-5 align-top text-right" data-menu-container="true">
+                              <div className="flex justify-end">
+                                <button
+                                  onClick={() => toggleActionMenu('portfolio', item.id)}
+                                  className="inline-flex items-center justify-center rounded-full border border-white/10 bg-white/10 p-2 text-slate-200 transition hover:border-[#6366f1] hover:text-white"
+                                  aria-label={`Aksi untuk ${item.title}`}
+                                >
+                                  <EllipsisVertical className="h-4 w-4" />
+                                </button>
+                              </div>
+                              {isMenuOpen && (
+                                <div className="absolute right-6 top-16 z-20 w-44 overflow-hidden rounded-xl border border-white/10 bg-[#0c1224] shadow-lg shadow-black/40">
+                                  <button
+                                    onClick={() => handlePortfolioEdit(item.id)}
+                                    className="flex w-full items-center gap-2 px-4 py-3 text-left text-sm text-slate-200 transition hover:bg-white/5"
+                                  >
+                                    <Pencil className="h-4 w-4" />
+                                    Edit portofolio
+                                  </button>
+                                  <button
+                                    onClick={() => handleDeleteRequest('portfolio', item.id, item.title)}
+                                    className="flex w-full items-center gap-2 px-4 py-3 text-left text-sm text-red-300 transition hover:bg-red-500/10"
+                                  >
+                                    <Trash2 className="h-4 w-4" />
+                                    Hapus
+                                  </button>
+                                </div>
+                              )}
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                ) : (
+                  <div className="flex flex-col items-center justify-center gap-4 px-10 py-16 text-center">
+                    <Layers3 className="h-10 w-10 text-slate-400" />
+                    <div className="space-y-1">
+                      <p className="text-sm font-semibold text-white">Belum ada portofolio</p>
+                      <p className="text-sm text-slate-400">Bagikan karya terbaik Anda melalui studi kasus.</p>
+                    </div>
+                    <button
+                      onClick={handlePortfolioAddClick}
+                      className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-[#06b6d4] to-[#2563eb] px-4 py-2 text-sm font-semibold text-white shadow-[0_12px_30px_rgba(14,165,233,0.35)] transition hover:brightness-110"
+                    >
+                      <Plus className="h-4 w-4" />
+                      Tambahkan portofolio
+                    </button>
+                  </div>
+                )}
+              </div>
+            </motion.section>
+          )}
+
+                {notification && (
+          <motion.div
+            initial={{ opacity: 0, y: 20, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 20, scale: 0.95 }}
+            className="fixed bottom-8 right-8 z-50 flex items-center gap-3 rounded-2xl border border-emerald-500/30 bg-gradient-to-br from-[#0c1224] to-[#070a13] p-4 text-sm text-emerald-200 shadow-2xl shadow-emerald-500/10"
+          >
+            <CircleCheck className="h-5 w-5" />
+            {notification}
+          </motion.div>
         )}
+
+        {deleteTarget && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-6 backdrop-blur-sm">
+            <div className="w-full max-w-md space-y-6 rounded-3xl border border-red-500/20 bg-[#0c090d] p-8 shadow-2xl shadow-red-500/10">
+              <div className="flex items-center gap-3">
+                <div className="rounded-2xl border border-red-500/40 bg-red-500/10 p-3 text-red-300">
+                  <AlertTriangle className="h-6 w-6" />
+                </div>
+                <div>
+                  <h2 className="text-lg font-semibold text-white">Konfirmasi penghapusan</h2>
+                  <p className="text-sm text-slate-400">
+                    Anda akan menghapus {deleteTarget.type === 'blog' ? 'artikel blog' : 'item portofolio'}
+                    <span className="font-semibold text-white"> {deleteTarget.label}</span>. Tindakan ini tidak dapat dibatalkan.
+                  </p>
+                </div>
+              </div>
+
+              {deleteError && (
+                <div className="rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-200">
+                  {deleteError}
+                </div>
+              )}
+
+              <div className="flex justify-end gap-3">
+                <button
+                  onClick={handleDeleteCancel}
+                  disabled={isDeleting}
+                  className="rounded-xl border border-white/10 bg-transparent px-4 py-2 text-sm font-medium text-slate-200 transition hover:border-white/30 hover:text-white disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  Batal
+                </button>
+                <button
+                  onClick={handleDeleteConfirm}
+                  disabled={isDeleting}
+                  className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-red-500 to-rose-500 px-4 py-2 text-sm font-semibold text-white shadow-[0_12px_30px_rgba(239,68,68,0.35)] transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {isDeleting ? (
+                    <>
+                      <motion.span
+                        className="h-2 w-2 rounded-full bg-white"
+                        animate={{ opacity: [0.3, 1, 0.3] }}
+                        transition={{ repeat: Infinity, duration: 1.2 }}
+                      />
+                      Menghapus...
+                    </>
+                  ) : (
+                    <>
+                      <Trash2 className="h-4 w-4" />
+                      Ya, hapus
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+
       </div>
     </div>
   );

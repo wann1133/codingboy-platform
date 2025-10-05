@@ -1,4 +1,5 @@
 'use client';
+import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { 
   Globe, 
@@ -85,13 +86,12 @@ export default function Dashboard() {
             </div>
             
             <div className="flex items-center space-x-4">
-              <a 
-                data-snappy-cta
+              <Link data-snappy-cta
                 href="/"
                 className="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors inline-block"
               >
                 Beranda
-              </a>
+              </Link>
               {/* Auth disabled */}
             </div>
           </div>
@@ -283,3 +283,6 @@ export default function Dashboard() {
     </div>
   );
 }
+
+
+

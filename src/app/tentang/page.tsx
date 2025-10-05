@@ -142,6 +142,7 @@ const fadeUp = {
   show: { opacity: 1, y: 0, transition: { ease: 'easeOut', duration: 0.6 } },
 } as const;
 
+
 export default function Tentang() {
   const { lang } = useLanguage();
   const navCopy = {
@@ -169,11 +170,10 @@ export default function Tentang() {
       </div>
       <PrimaryNav labels={navLabels} />
 
-      <main className="pt-28">
+      <main className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 pt-32 pb-24">
         <motion.section
           initial="hidden"
-          whileInView="show"
-          viewport={{ once: true, amount: 0.4 }}
+          animate="show"
           variants={fadeUp}
           className="relative mx-auto mb-20 max-w-5xl rounded-3xl border border-[#1b253a] bg-gradient-to-br from-[#0f172a]/80 to-[#050a18]/90 p-10 text-center shadow-[0_32px_90px_rgba(5,10,25,0.55)]"
         >
@@ -192,7 +192,7 @@ export default function Tentang() {
           </p>
           <div className="relative mt-8 flex flex-col gap-4 sm:flex-row sm:justify-center">
             <a
-              href="https://wa.me/6281532797240?text=Halo%20CodingBoy!%20Saya%20ingin%20mendiskusikan%20project%20website."
+              href="https://wa.me/6285609408506?text=Halo%20CodingBoy!%20Saya%20ingin%20mendiskusikan%20project%20website."
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-[#6d6bff] to-[#a855f7] px-6 py-3 text-sm font-semibold text-white shadow-[0_18px_45px_rgba(104,97,255,0.45)] transition-all hover:shadow-[0_22px_55px_rgba(104,97,255,0.55)]"
@@ -212,8 +212,7 @@ export default function Tentang() {
 
         <motion.section
           initial="hidden"
-          whileInView="show"
-          viewport={{ once: true, amount: 0.3 }}
+          animate="show"
           variants={fadeUp}
           className="mx-auto mb-20 max-w-6xl"
         >
@@ -222,8 +221,7 @@ export default function Tentang() {
               <motion.div
                 key={stat.label}
                 initial={{ opacity: 0, y: 24 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, amount: 0.6 }}
+                animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.08, duration: 0.6, ease: 'easeOut' }}
                 className="rounded-2xl border border-[#1f2b42] bg-[#080f1f]/75 p-6 text-center shadow-[0_18px_45px_rgba(5,10,25,0.4)]"
               >
@@ -237,8 +235,7 @@ export default function Tentang() {
 
         <motion.section
           initial="hidden"
-          whileInView="show"
-          viewport={{ once: true, amount: 0.35 }}
+          animate="show"
           variants={fadeUp}
           className="mx-auto mb-20 max-w-6xl"
         >
@@ -253,8 +250,7 @@ export default function Tentang() {
               <motion.div
                 key={service.title}
                 initial={{ opacity: 0, y: 28 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, amount: 0.4 }}
+                animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.08, duration: 0.6, ease: 'easeOut' }}
                 className="rounded-3xl border border-[#1f2b42] bg-[#080f1f]/75 p-8 shadow-[0_20px_55px_rgba(5,10,25,0.45)]"
               >
@@ -278,8 +274,7 @@ export default function Tentang() {
 
         <motion.section
           initial="hidden"
-          whileInView="show"
-          viewport={{ once: true, amount: 0.3 }}
+          animate="show"
           variants={fadeUp}
           className="mx-auto mb-20 max-w-6xl"
         >
@@ -294,8 +289,7 @@ export default function Tentang() {
               <motion.div
                 key={value.title}
                 initial={{ opacity: 0, y: 24 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, amount: 0.45 }}
+                animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.06, duration: 0.55, ease: 'easeOut' }}
                 className="rounded-2xl border border-[#1f2b42] bg-[#080f1f]/70 p-6 shadow-[0_16px_40px_rgba(5,10,25,0.38)]"
               >
@@ -309,8 +303,7 @@ export default function Tentang() {
 
         <motion.section
           initial="hidden"
-          whileInView="show"
-          viewport={{ once: true, amount: 0.3 }}
+          animate="show"
           variants={fadeUp}
           className="mx-auto mb-20 max-w-6xl"
         >
@@ -325,8 +318,7 @@ export default function Tentang() {
               <motion.div
                 key={member.name}
                 initial={{ opacity: 0, y: 24 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, amount: 0.4 }}
+                animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.08, duration: 0.6, ease: 'easeOut' }}
                 className="relative overflow-hidden rounded-3xl border border-[#1f2b42] bg-[#080f1f]/75 p-8 shadow-[0_22px_60px_rgba(5,10,25,0.45)]"
               >
@@ -366,8 +358,7 @@ export default function Tentang() {
 
         <motion.section
           initial="hidden"
-          whileInView="show"
-          viewport={{ once: true, amount: 0.3 }}
+          animate="show"
           variants={fadeUp}
           className="mx-auto mb-20 max-w-6xl"
         >
@@ -380,8 +371,7 @@ export default function Tentang() {
               <motion.div
                 key={testimonial.name}
                 initial={{ opacity: 0, y: 24 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, amount: 0.4 }}
+                animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.08, duration: 0.6, ease: 'easeOut' }}
                 className="flex h-full flex-col justify-between rounded-2xl border border-[#1f2b42] bg-[#080f1f]/75 p-6 shadow-[0_18px_45px_rgba(5,10,25,0.4)]"
               >
@@ -409,8 +399,7 @@ export default function Tentang() {
 
         <motion.section
           initial="hidden"
-          whileInView="show"
-          viewport={{ once: true, amount: 0.4 }}
+          animate="show"
           variants={fadeUp}
           className="mx-auto mb-24 max-w-5xl text-center"
         >
@@ -422,7 +411,7 @@ export default function Tentang() {
             </p>
             <div className="mt-8 flex flex-col gap-4 sm:flex-row sm:justify-center">
               <a
-                href="https://wa.me/6281532797240?text=Halo%20CodingBoy!%20Saya%20ingin%20mendiskusikan%20project%20website."
+                href="https://wa.me/6285609408506?text=Halo%20CodingBoy!%20Saya%20ingin%20mendiskusikan%20project%20website."
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-[#6d6bff] to-[#a855f7] px-7 py-3 text-sm font-semibold text-white shadow-[0_18px_45px_rgba(104,97,255,0.45)] transition-all hover:shadow-[0_22px_55px_rgba(104,97,255,0.55)]"

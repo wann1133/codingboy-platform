@@ -1,10 +1,22 @@
 import prisma from '@/lib/prisma';
 import { blogSeedPayload, portfolioSeedPayload } from '@/lib/default-content';
+import { prepareTagsForPersist } from '@/lib/blog-tags';
 
 export async function ensureDefaultBlogs() {
   await Promise.all(
-    blogSeedPayload.map((entry) =>
-      prisma.blogPost.upsert({
+    blogSeedPayload.map((entry) => {
+      const { readTime: seedReadTime, tags: seedTags, ...rest } = entry;
+      const { tags } = prepareTagsForPersist(seedTags, entry.slug, seedReadTime, entry.content);
+      const createPayload = {
+        ...rest,
+        tags,
+        published: true,
+        featured: entry.featured,
+        views: entry.views,
+        publishedAt: entry.publishedAt,
+      };
+
+      return prisma.blogPost.upsert({
         where: { slug: entry.slug },
         update: {
           title: entry.title,
@@ -12,16 +24,15 @@ export async function ensureDefaultBlogs() {
           content: entry.content,
           image: entry.image ?? null,
           category: entry.category,
-          tags: entry.tags,
-          readTime: entry.readTime,
+          tags,
           published: true,
           featured: entry.featured,
           views: entry.views,
           publishedAt: entry.publishedAt,
         },
-        create: entry,
-      }),
-    ),
+        create: createPayload,
+      });
+    }),
   );
 }
 
@@ -50,3 +61,4 @@ export async function ensureDefaultPortfolios() {
     ),
   );
 }
+

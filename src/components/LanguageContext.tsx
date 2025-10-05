@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState, ReactNode } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useState, ReactNode } from "react";
 
 export type Lang = "id" | "en";
 
@@ -11,32 +11,46 @@ type Ctx = {
 
 const LanguageContext = createContext<Ctx>({ lang: "id", setLang: () => {} });
 
+function getStoredLang(): Lang | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const saved = window.localStorage.getItem("lang");
+    return saved === "id" || saved === "en" ? saved : null;
+  } catch {
+    return null;
+  }
+}
+
 export function LanguageProvider({ children }: { children: ReactNode }) {
-  const [lang, setLang] = useState<Lang>(() => {
-    if (typeof window !== "undefined") {
-      const saved = window.localStorage.getItem("lang");
-      if (saved === "id" || saved === "en") return saved;
+  const [lang, setLangState] = useState<Lang>("id");
+
+  useEffect(() => {
+    const saved = getStoredLang();
+    if (saved) {
+      setLangState(saved);
     }
-    return "id";
-  });
+  }, []);
 
   useEffect(() => {
     if (typeof document !== "undefined") {
       document.documentElement.lang = lang;
     }
-    try {
-      window.localStorage.setItem("lang", lang);
-    } catch {}
+    if (typeof window !== "undefined") {
+      try {
+        window.localStorage.setItem("lang", lang);
+      } catch {}
+    }
   }, [lang]);
 
-  return (
-    <LanguageContext.Provider value={{ lang, setLang }}>
-      {children}
-    </LanguageContext.Provider>
-  );
+  const setLang = useCallback((next: Lang) => {
+    setLangState(next);
+  }, []);
+
+  const value = useMemo(() => ({ lang, setLang }), [lang, setLang]);
+
+  return <LanguageContext.Provider value={value}>{children}</LanguageContext.Provider>;
 }
 
 export function useLanguage() {
   return useContext(LanguageContext);
 }
-

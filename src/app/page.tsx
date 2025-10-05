@@ -1,4 +1,5 @@
 'use client';
+import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import {
   Zap,
@@ -25,6 +26,68 @@ import { useLanguage } from '@/components/LanguageContext';
 
 export default function Home() {
   const { lang } = useLanguage();
+
+  const [isContactFormReady, setIsContactFormReady] = useState(false);
+
+  useEffect(() => {
+    setIsContactFormReady(true);
+  }, []);
+
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    service: '',
+    budget: '',
+    message: ''
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSubmitted, setIsSubmitted] = useState(false);
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value
+    });
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+
+    try {
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to send message');
+      }
+
+      setIsSubmitting(false);
+      setIsSubmitted(true);
+
+      setTimeout(() => {
+        setIsSubmitted(false);
+        setFormData({
+          name: '',
+          email: '',
+          phone: '',
+          service: '',
+          budget: '',
+          message: ''
+        });
+      }, 3000);
+    } catch (error) {
+      console.error(error);
+      setIsSubmitting(false);
+      // You might want to show an error message to the user
+    }
+  };
 
   const t = {
     id: {
@@ -69,7 +132,7 @@ export default function Home() {
     show: { opacity: 1, y: 0, transition: { ease: 'easeOut', duration: 0.6 } },
   } as const;
 
-  const revealViewport = { once: true, amount: 0.3 } as const;
+  const revealViewport = { once: true, amount: 0.1 } as const;
 
   const packages = [
     { id: 0, name: "Paket Starter", price: "Rp 1.500.000", duration: "3-5 hari",
@@ -125,8 +188,7 @@ export default function Home() {
           <div className="text-center w-full">
             <motion.div
               initial="hidden"
-              whileInView="show"
-              viewport={{ once: true, amount: 0.75 }}
+              animate="show"
               variants={heroContainer}
               className="font-display font-bold uppercase leading-[0.82] tracking-tight text-white select-none"
             >
@@ -142,8 +204,7 @@ export default function Home() {
 
             <motion.p
               initial="hidden"
-              whileInView="show"
-              viewport={{ once: true, amount: 0.7 }}
+              animate="show"
               variants={fadeUp}
               className="text-base md:text-xl text-slate-300 mt-8 mb-12 max-w-3xl mx-auto"
             >
@@ -152,8 +213,7 @@ export default function Home() {
 
             <motion.div
               initial="hidden"
-              whileInView="show"
-              viewport={{ once: true, amount: 0.7 }}
+              animate="show"
               variants={fadeUp}
               className="flex flex-col sm:flex-row gap-4 justify-center"
             >
@@ -422,7 +482,7 @@ export default function Home() {
                   ))}
                 </div>
                 
-                <p className="text-slate-300 italic leading-relaxed">"{testimonial.text}"</p>
+                <p className="text-slate-300 italic leading-relaxed">&ldquo;{testimonial.text}&rdquo;</p>
               </motion.div>
             ))}
           </div>
@@ -634,55 +694,111 @@ export default function Home() {
             >
               <h3 className="text-xl font-semibold text-white mb-6 tracking-wide">Kirim Pesan</h3>
               
-              <form className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <input
-                    type="text"
-                    placeholder="Nama Lengkap"
-                    className="w-full rounded-lg border border-[#273249] bg-[#0f1628] px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-[#6366f1] focus:ring-2 focus:ring-[#6366f1]/30"
-                  />
-                  <input
-                    type="email"
-                    placeholder="Email"
-                    className="w-full rounded-lg border border-[#273249] bg-[#0f1628] px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-[#6366f1] focus:ring-2 focus:ring-[#6366f1]/30"
-                  />
+              {isContactFormReady ? (
+                isSubmitted ? (
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="text-center py-12"
+                  >
+                    <CheckCircle className="w-16 h-16 text-green-400 mx-auto mb-4" />
+                    <h4 className="text-xl font-semibold text-white mb-2">Pesan Terkirim!</h4>
+                    <p className="text-gray-300">
+                      Terima kasih! Kami akan segera menghubungi Anda.
+                    </p>
+                  </motion.div>
+                ) : (
+                  <form className="space-y-4" autoComplete="off" onSubmit={handleSubmit}>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <input
+                        type="text"
+                        name="name"
+                        placeholder="Nama Lengkap"
+                        autoComplete="name"
+                        value={formData.name}
+                        onChange={handleInputChange}
+                        required
+                        className="w-full rounded-lg border border-[#273249] bg-[#0f1628] px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-[#6366f1] focus:ring-2 focus:ring-[#6366f1]/30"
+                      />
+                      <input
+                        type="email"
+                        name="email"
+                        placeholder="Email"
+                        autoComplete="email"
+                        value={formData.email}
+                        onChange={handleInputChange}
+                        required
+                        className="w-full rounded-lg border border-[#273249] bg-[#0f1628] px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-[#6366f1] focus:ring-2 focus:ring-[#6366f1]/30"
+                      />
+                    </div>
+                    
+                    <input
+                      type="tel"
+                      name="phone"
+                      placeholder="Nomor WhatsApp"
+                      autoComplete="tel"
+                      value={formData.phone}
+                      onChange={handleInputChange}
+                      required
+                      className="w-full rounded-lg border border-[#273249] bg-[#0f1628] px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-[#6366f1] focus:ring-2 focus:ring-[#6366f1]/30"
+                    />
+                    
+                    <select 
+                      name="service"
+                      value={formData.service}
+                      onChange={handleInputChange}
+                      className="w-full rounded-lg border border-[#273249] bg-[#0f1628] px-4 py-3 text-white focus:outline-none focus:border-[#6366f1] focus:ring-2 focus:ring-[#6366f1]/30">
+                      <option value="">Pilih Layanan</option>
+                      <option value="starter">Paket Starter</option>
+                      <option value="business">Paket Business</option>
+                      <option value="enterprise">Paket Enterprise</option>
+                      <option value="custom">Custom Project</option>
+                    </select>
+                    
+                    <select 
+                      name="budget"
+                      value={formData.budget}
+                      onChange={handleInputChange}
+                      className="w-full rounded-lg border border-[#273249] bg-[#0f1628] px-4 py-3 text-white focus:outline-none focus:border-[#6366f1] focus:ring-2 focus:ring-[#6366f1]/30">
+                      <option value="">Budget Range</option>
+                      <option value="1-3">Rp 1-3 Juta</option>
+                      <option value="3-5">Rp 3-5 Juta</option>
+                      <option value="5-10">Rp 5-10 Juta</option>
+                      <option value="10+">Rp 10+ Juta</option>
+                    </select>
+                    
+                    <textarea
+                      name="message"
+                      rows={4}
+                      placeholder="Ceritakan tentang proyek Anda..."
+                      value={formData.message}
+                      onChange={handleInputChange}
+                      required
+                      className="w-full resize-none rounded-lg border border-[#273249] bg-[#0f1628] px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-[#6366f1] focus:ring-2 focus:ring-[#6366f1]/30"
+                    ></textarea>
+                    
+                    <button
+                      type="submit"
+                      disabled={isSubmitting}
+                      className="w-full rounded-full bg-gradient-to-r from-[#6d6bff] to-[#a855f7] py-3 px-6 text-sm font-semibold uppercase tracking-[0.18em] text-white shadow-[0_18px_45px_rgba(104,97,255,0.4)] hover:-translate-y-0.5 transition-all disabled:from-[#1f273d] disabled:to-[#1f273d] disabled:opacity-70"
+                    >
+                      {isSubmitting ? 'Mengirim...' : 'Kirim Pesan'}
+                    </button>
+                  </form>
+                )
+              ) : (
+                <div className="space-y-4" aria-hidden="true">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="h-12 rounded-lg border border-[#273249] bg-[#0f1829] animate-pulse" />
+                    <div className="h-12 rounded-lg border border-[#273249] bg-[#0f1829] animate-pulse" />
+                  </div>
+                  <div className="h-12 rounded-lg border border-[#273249] bg-[#0f1829] animate-pulse" />
+                  <div className="h-12 rounded-lg border border-[#273249] bg-[#0f1829] animate-pulse" />
+                  <div className="h-12 rounded-lg border border-[#273249] bg-[#0f1829] animate-pulse" />
+                  <div className="h-20 rounded-lg border border-[#273249] bg-[#0f1829] animate-pulse" />
+                  <div className="h-12 rounded-full bg-gradient-to-r from-[#6d6bff]/40 via-[#7b4dff]/40 to-[#a855f7]/40 animate-pulse" />
                 </div>
-                
-                <input
-                  type="tel"
-                  placeholder="Nomor WhatsApp"
-                  className="w-full rounded-lg border border-[#273249] bg-[#0f1628] px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-[#6366f1] focus:ring-2 focus:ring-[#6366f1]/30"
-                />
-                
-                <select className="w-full rounded-lg border border-[#273249] bg-[#0f1628] px-4 py-3 text-white focus:outline-none focus:border-[#6366f1] focus:ring-2 focus:ring-[#6366f1]/30">
-                  <option value="">Pilih Layanan</option>
-                  <option value="starter">Paket Starter</option>
-                  <option value="business">Paket Business</option>
-                  <option value="enterprise">Paket Enterprise</option>
-                  <option value="custom">Custom Project</option>
-                </select>
-                
-                <select className="w-full rounded-lg border border-[#273249] bg-[#0f1628] px-4 py-3 text-white focus:outline-none focus:border-[#6366f1] focus:ring-2 focus:ring-[#6366f1]/30">
-                  <option value="">Budget Range</option>
-                  <option value="1-3">Rp 1-3 Juta</option>
-                  <option value="3-5">Rp 3-5 Juta</option>
-                  <option value="5-10">Rp 5-10 Juta</option>
-                  <option value="10+">Rp 10+ Juta</option>
-                </select>
-                
-                <textarea
-                  rows={4}
-                  placeholder="Ceritakan tentang proyek Anda..."
-                  className="w-full resize-none rounded-lg border border-[#273249] bg-[#0f1628] px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-[#6366f1] focus:ring-2 focus:ring-[#6366f1]/30"
-                ></textarea>
-                
-                <button
-                  type="submit"
-                  className="w-full rounded-full bg-gradient-to-r from-[#6d6bff] to-[#a855f7] py-3 px-6 text-sm font-semibold uppercase tracking-[0.18em] text-white shadow-[0_18px_45px_rgba(104,97,255,0.4)] hover:-translate-y-0.5 transition-all"
-                >
-                  Kirim Pesan
-                </button>
-              </form>
+              )}
             </motion.div>
           </div>
         </div>
@@ -747,3 +863,6 @@ export default function Home() {
     </div>
   );
 }
+
+
+

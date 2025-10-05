@@ -2,15 +2,18 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   ArrowRight,
   ChevronDown,
   Globe,
+  Menu,
   MessageCircle,
   Palette,
   ShoppingCart,
+  X,
 } from "lucide-react";
 
 import LanguageToggle from "@/components/LanguageToggle";
@@ -84,6 +87,7 @@ export default function PrimaryNav({ labels }: PrimaryNavProps) {
 
   const [openMega, setOpenMega] = useState(false);
   const [hoveredId, setHoveredId] = useState<NavItemId | null>(null);
+  const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
 
   const activeId: NavItemId | null = useMemo(() => {
     if (openMega) return "portfolio";
@@ -135,6 +139,7 @@ export default function PrimaryNav({ labels }: PrimaryNavProps) {
   useEffect(() => {
     setOpenMega(false);
     setHoveredId(null);
+    setIsMobileNavOpen(false);
   }, [pathname]);
 
   return (
@@ -146,11 +151,13 @@ export default function PrimaryNav({ labels }: PrimaryNavProps) {
         <div className="flex items-center justify-between gap-4 py-4 sm:py-5">
           <Link href="/" aria-label="CodingBoy" className="flex items-center">
             <div className="flex h-12 w-auto items-center overflow-hidden sm:h-14">
-              <img
+              <Image
                 src="/logo.png"
                 alt="CodingBoy"
+                width={160}
+                height={56}
+                priority
                 className="h-full w-auto"
-                loading="eager"
               />
             </div>
             <span className="sr-only">CodingBoy</span>
@@ -237,10 +244,10 @@ export default function PrimaryNav({ labels }: PrimaryNavProps) {
                   transition={{ duration: 0.22, ease: "easeOut" }}
                   onMouseEnter={clearHoverTimeout}
                   onMouseLeave={scheduleMegaClose}
-                  className="absolute left-1/2 top-full z-40 mt-6 w-[min(860px,90vw)] -translate-x-1/2 rounded-3xl border border-[#1b253a] bg-[#030817]/95 p-8 shadow-[0_28px_80px_rgba(8,12,24,0.75)] backdrop-blur-xl"
+                  className="portfolio-mega absolute left-1/2 top-full z-40 mt-6 w-[min(860px,90vw)] -translate-x-1/2 rounded-3xl border border-[#1b253a] bg-[#030817]/95 p-0 shadow-[0_28px_80px_rgba(8,12,24,0.75)] backdrop-blur-xl"
                   role="menu"
                 >
-                  <div className="flex flex-col gap-8">
+                  <div className="max-h-[70vh] overflow-y-auto p-8 pr-6 flex flex-col gap-8">
                     <div className="flex flex-col gap-3">
                       <span className="text-xs font-semibold uppercase tracking-[0.35em] text-[#6d6bff]">
                         Portfolio Highlights
@@ -312,7 +319,7 @@ export default function PrimaryNav({ labels }: PrimaryNavProps) {
                         </p>
                       </div>
                       <a
-                        href="https://wa.me/6281532797240?text=Halo%20CodingBoy!%20Saya%20ingin%20diskusi%20tentang%20portfolio%20dan%20layanan%20Anda."
+                        href="https://wa.me/6285609408506?text=Halo%20CodingBoy!%20Saya%20ingin%20diskusi%20tentang%20portfolio%20dan%20layanan%20Anda."
                         target="_blank"
                         rel="noopener noreferrer"
                         onClick={() => setOpenMega(false)}
@@ -328,16 +335,10 @@ export default function PrimaryNav({ labels }: PrimaryNavProps) {
             </AnimatePresence>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="hidden md:flex items-center gap-3">
             <LanguageToggle />
-            <Link
-              href="/kontak"
-              className="hidden rounded-full border border-[#273149] bg-[#0b1324]/70 px-4 py-2 text-sm font-medium text-slate-200 transition-all hover:border-[#6d6bff] hover:text-white sm:inline-flex"
-            >
-              {labels.contact}
-            </Link>
             <a
-              href="https://wa.me/6281532797240?text=Halo%20CodingBoy!%20Saya%20ingin%20mendiskusikan%20project%20website."
+              href="https://wa.me/6285609408506?text=Halo%20CodingBoy!%20Saya%20ingin%20mendiskusikan%20project%20website."
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-[#6d6bff] to-[#a855f7] px-5 py-2 text-sm font-semibold text-white shadow-[0_14px_35px_rgba(104,97,255,0.45)] transition-all hover:shadow-[0_18px_45px_rgba(104,97,255,0.55)]"
@@ -346,8 +347,77 @@ export default function PrimaryNav({ labels }: PrimaryNavProps) {
               Konsultasi
             </a>
           </div>
-        </div>
+
+          <div className="flex items-center gap-3 md:hidden">
+            <LanguageToggle />
+            <button
+              type="button"
+              onClick={() => setIsMobileNavOpen((prev) => !prev)}
+              className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white"
+              aria-expanded={isMobileNavOpen}
+              aria-label="Toggle navigation"
+            >
+              {isMobileNavOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            </button>
+          </div>
+          </div>
+
+        <AnimatePresence>
+          {isMobileNavOpen && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.24, ease: "easeOut" }}
+              className="md:hidden"
+            >
+              <div className="pt-2 pb-4">
+                <div className="space-y-4 rounded-2xl border border-white/10 bg-[#050915]/95 p-4 shadow-[0_18px_45px_rgba(4,10,24,0.55)]">
+                  <div className="space-y-2">
+                    {NAV_LINKS.map(({ id, href }) => {
+                      const label = labels[id];
+                      const isActive = activeId === id;
+
+                      return (
+                        <Link
+                          key={id}
+                          href={href}
+                          onClick={() => setIsMobileNavOpen(false)}
+                          className={`flex items-center justify-between rounded-xl px-4 py-3 text-sm font-medium transition-colors ${
+                            isActive
+                              ? "bg-gradient-to-r from-[#6d6bff]/20 to-[#a855f7]/20 text-white"
+                              : "bg-white/5 text-slate-100 hover:bg-white/10 hover:text-white"
+                          }`}
+                        >
+                          <span>{label}</span>
+                          <ArrowRight className="h-4 w-4 opacity-70" />
+                        </Link>
+                      );
+                    })}
+                  </div>
+
+                  <div className="space-y-3 border-t border-white/10 pt-4">
+                    <p className="text-xs font-semibold uppercase tracking-[0.28em] text-slate-400">
+                      Butuh bantuan cepat?
+                    </p>
+                    <a
+                      href="https://wa.me/6285609408506?text=Halo%20CodingBoy!%20Saya%20ingin%20mendiskusikan%20project%20website."
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-[#6d6bff] to-[#a855f7] px-5 py-3 text-sm font-semibold text-white shadow-[0_14px_35px_rgba(104,97,255,0.45)] transition-all hover:shadow-[0_18px_45px_rgba(104,97,255,0.55)]"
+                    >
+                      <MessageCircle className="h-4 w-4" />
+                      Konsultasi
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </nav>
   );
 }
+
+

@@ -1,6 +1,9 @@
 import { PrismaClient } from '@prisma/client';
 
-import { blogSeedPayload, portfolioSeedPayload } from '../src/lib/default-content';
+import { blogSeedPayload, portfolioSeedPayload } from '@/lib/default-content';
+
+import { prepareTagsForPersist } from '@/lib/blog-tags';
+import { prepareFeaturesForPersist } from '@/lib/portfolio-features';
 
 const prisma = new PrismaClient();
 
@@ -12,14 +15,14 @@ async function seedServices() {
       description: 'Landing Page Profesional untuk bisnis kecil',
       price: 1_500_000,
       duration: '3-5 hari',
-      features: JSON.stringify([
+      features: [
         'Landing Page Profesional',
         'Mobile Responsive',
         'Domain + Hosting 1 tahun',
         'WhatsApp Integration',
         'Basic SEO Setup',
         '1x Revisi Desain',
-      ]),
+      ],
       popular: false,
       active: true,
     },
@@ -29,7 +32,7 @@ async function seedServices() {
       description: 'Company Profile Lengkap untuk bisnis menengah',
       price: 3_500_000,
       duration: '5-7 hari',
-      features: JSON.stringify([
+      features: [
         'Company Profile Lengkap',
         '5-7 Halaman',
         'Content Management System',
@@ -37,7 +40,7 @@ async function seedServices() {
         'Contact Forms',
         'Social Media Integration',
         '2x Revisi Desain',
-      ]),
+      ],
       popular: true,
       active: true,
     },
@@ -47,7 +50,7 @@ async function seedServices() {
       description: 'E-commerce Ready untuk bisnis besar',
       price: 6_500_000,
       duration: '7-14 hari',
-      features: JSON.stringify([
+      features: [
         'E-commerce Ready',
         '10+ Halaman Custom',
         'Admin Dashboard',
@@ -55,7 +58,7 @@ async function seedServices() {
         'Advanced SEO',
         'Blog System',
         '3x Revisi Desain',
-      ]),
+      ],
       popular: false,
       active: true,
     },
@@ -71,33 +74,37 @@ async function seedServices() {
 
 async function seedPortfolios() {
   await Promise.all(
-    portfolioSeedPayload.map((entry) =>
-      prisma.portfolio.upsert({
+    portfolioSeedPayload.map((entry) => {
+      const { status: seedStatus, features: seedFeatures, ...rest } = entry;
+      const { features } = prepareFeaturesForPersist(seedFeatures, entry.slug, seedStatus);
+      const createPayload = { ...rest, features };
+
+      return prisma.portfolio.upsert({
         where: { slug: entry.slug },
         update: {
+          title: entry.title,
           description: entry.description,
           category: entry.category,
           image: entry.image ?? null,
           url: entry.url ?? null,
-          features: entry.features,
+          features,
           duration: entry.duration,
           client: entry.client ?? null,
           testimonial: entry.testimonial ?? null,
           rating: entry.rating ?? 5,
-          status: entry.status,
           featured: entry.featured,
           active: entry.active ?? true,
         },
-        create: entry,
-      }),
-    ),
+        create: createPayload,
+      });
+    }),
   );
-  console.log('  • Portfolio items ensured');
+  console.log('  ??? Portfolio items ensured');
 }
-
 async function seedTestimonials() {
   const testimonialData = [
     {
+      id: 'testimonial-budi-santoso',
       name: 'Budi Santoso',
       company: 'Warung Makan Sederhana',
       rating: 5,
@@ -107,6 +114,7 @@ async function seedTestimonials() {
       active: true,
     },
     {
+      id: 'testimonial-sari-dewi',
       name: 'Sari Dewi',
       company: 'Boutique Fashion',
       rating: 5,
@@ -116,6 +124,7 @@ async function seedTestimonials() {
       active: true,
     },
     {
+      id: 'testimonial-ahmad-rahman',
       name: 'Ahmad Rahman',
       company: 'Jasa Konsultan',
       rating: 5,
@@ -125,6 +134,7 @@ async function seedTestimonials() {
       active: true,
     },
     {
+      id: 'testimonial-maya-putri',
       name: 'Maya Putri',
       company: 'Toko Online Fashion',
       rating: 5,
@@ -134,6 +144,7 @@ async function seedTestimonials() {
       active: true,
     },
     {
+      id: 'testimonial-andi-wijaya',
       name: 'Andi Wijaya',
       company: 'Klinik Kesehatan',
       rating: 5,
@@ -147,7 +158,7 @@ async function seedTestimonials() {
   await Promise.all(
     testimonialData.map((testimonial) =>
       prisma.testimonial.upsert({
-        where: { name: testimonial.name },
+        where: { id: testimonial.id },
         update: testimonial,
         create: testimonial,
       }),
@@ -158,8 +169,19 @@ async function seedTestimonials() {
 
 async function seedBlogs() {
   await Promise.all(
-    blogSeedPayload.map((entry) =>
-      prisma.blogPost.upsert({
+    blogSeedPayload.map((entry) => {
+      const { readTime: seedReadTime, tags: seedTags, ...rest } = entry;
+      const { tags } = prepareTagsForPersist(seedTags, entry.slug, seedReadTime, entry.content);
+      const createPayload = {
+        ...rest,
+        tags,
+        published: true,
+        featured: entry.featured,
+        views: entry.views,
+        publishedAt: entry.publishedAt,
+      };
+
+      return prisma.blogPost.upsert({
         where: { slug: entry.slug },
         update: {
           title: entry.title,
@@ -167,20 +189,18 @@ async function seedBlogs() {
           content: entry.content,
           category: entry.category,
           image: entry.image ?? null,
-          tags: entry.tags,
-          readTime: entry.readTime,
+          tags,
           published: true,
           featured: entry.featured,
           views: entry.views,
           publishedAt: entry.publishedAt,
         },
-        create: entry,
-      }),
-    ),
+        create: createPayload,
+      });
+    }),
   );
-  console.log('  • Blog posts ensured');
+  console.log('  ??? Blog posts ensured');
 }
-
 async function main() {
   console.log('🌱 Seeding database...');
   await seedServices();
@@ -198,3 +218,24 @@ main()
   .finally(async () => {
     await prisma.$disconnect();
   });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

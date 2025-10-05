@@ -14,6 +14,7 @@ const fadeUp = {
   show: { opacity: 1, y: 0, transition: { ease: 'easeOut', duration: 0.6 } },
 } as const;
 
+
 const defaultCategories = ['Semua', 'F&B', 'Fashion', 'Jasa', 'E-commerce', 'Creative', 'Health'] as const;
 
 type PortfolioItem = {
@@ -88,6 +89,19 @@ const fallbackPortfolioItems: PortfolioItem[] = defaultPortfolioEntries.map((ent
   featured: entry.featured,
 }));
 
+const deriveCategoryFilters = (portfolio: PortfolioItem[]): string[] => {
+  const categories = new Set<string>(defaultCategories);
+
+  portfolio.forEach((item) => {
+    const category = item.category?.trim();
+    if (category) {
+      categories.add(category);
+    }
+  });
+
+  return Array.from(categories);
+};
+
 export default function Portfolio() {
   const { lang } = useLanguage();
   const navCopy = {
@@ -106,10 +120,10 @@ export default function Portfolio() {
   } as const;
   const navLabels = navCopy[(lang as 'id' | 'en') || 'id'];
 
-  const [items, setItems] = useState<PortfolioItem[]>([]);
-  const [categoryFilters, setCategoryFilters] = useState<string[]>([...defaultCategories]);
+  const [items, setItems] = useState<PortfolioItem[]>(fallbackPortfolioItems);
+  const [categoryFilters, setCategoryFilters] = useState<string[]>(deriveCategoryFilters(fallbackPortfolioItems));
   const [activeFilter, setActiveFilter] = useState<string>('Semua');
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -136,18 +150,11 @@ export default function Portfolio() {
         const hydratedItems = normalized.length > 0 ? normalized : fallbackPortfolioItems;
 
         setItems(hydratedItems);
-
-        const dynamicCategories = Array.from(
-          new Set(hydratedItems.map((item) => item.category).filter(Boolean)),
-        );
-        setCategoryFilters(['Semua', ...dynamicCategories.filter((cat) => cat !== 'Semua')]);
+        setCategoryFilters(deriveCategoryFilters(hydratedItems));
       } catch (err) {
         if (!isMounted) return;
         setItems(fallbackPortfolioItems);
-        const dynamicCategories = Array.from(
-          new Set(fallbackPortfolioItems.map((item) => item.category).filter(Boolean)),
-        );
-        setCategoryFilters(['Semua', ...dynamicCategories.filter((cat) => cat !== 'Semua')]);
+        setCategoryFilters(deriveCategoryFilters(fallbackPortfolioItems));
         setError(err instanceof Error ? err.message : 'Terjadi kesalahan saat memuat portofolio.');
       } finally {
         if (isMounted) {
@@ -171,6 +178,8 @@ export default function Portfolio() {
     return items.filter((item) => item.category === activeFilter);
   }, [activeFilter, items]);
 
+  const showInitialLoading = isLoading && items.length === 0;
+
   return (
     <div className="relative min-h-screen overflow-hidden bg-[#05070d] text-slate-100">
       <div className="pointer-events-none absolute inset-0 -z-10">
@@ -181,11 +190,10 @@ export default function Portfolio() {
 
       <PrimaryNav labels={navLabels} />
 
-      <main className="pt-28 pb-24">
+      <main className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 pt-32 pb-24">
         <motion.section
           initial="hidden"
-          whileInView="show"
-          viewport={{ once: true, amount: 0.4 }}
+          animate="show"
           variants={fadeUp}
           className="relative mx-auto mb-16 max-w-5xl overflow-hidden rounded-3xl border border-[#1b253a] bg-gradient-to-br from-[#0f172a]/85 to-[#050a18]/90 p-12 text-center shadow-[0_32px_90px_rgba(5,10,25,0.55)]"
         >
@@ -206,8 +214,7 @@ export default function Portfolio() {
 
         <motion.div
           initial="hidden"
-          whileInView="show"
-          viewport={{ once: true, amount: 0.35 }}
+          animate="show"
           variants={fadeUp}
           className="mx-auto mb-16 max-w-4xl"
         >
@@ -226,15 +233,14 @@ export default function Portfolio() {
               </button>
             ))}
           </div>
-          {error && !isLoading && (
+          {error && !showInitialLoading && (
             <p className="mt-4 text-center text-sm text-red-300">{error}</p>
           )}
         </motion.div>
 
         <motion.section
           initial="hidden"
-          whileInView="show"
-          viewport={{ once: true, amount: 0.35 }}
+          animate="show"
           variants={fadeUp}
           className="mx-auto max-w-6xl"
         >
@@ -245,8 +251,8 @@ export default function Portfolio() {
                 <motion.div
                   key={item.id}
                   initial={{ opacity: 0, y: 28 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true, amount: 0.5 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  
                   transition={{ delay: index * 0.06, duration: 0.55, ease: 'easeOut' }}
                   className="group flex h-full flex-col overflow-hidden rounded-3xl border border-[#1f2b42] bg-[#080f1f]/80 shadow-[0_20px_55px_rgba(5,10,25,0.45)] transition-all hover:border-[#6d6bff]"
                 >
@@ -321,7 +327,7 @@ export default function Portfolio() {
                         <Calendar className="mr-2 h-4 w-4" />
                         {item.status === 'completed'
                           ? `Selesai dalam ${item.duration}`
-                          : `Sedang berjalan • Estimasi ${item.duration}`}
+                          : `Sedang berjalan - Estimasi ${item.duration}`}
                       </span>
                       <div className="rounded-2xl border border-[#273149] bg-[#0b1324]/60 p-4">
                         <div className="flex items-center gap-2">
@@ -360,7 +366,7 @@ export default function Portfolio() {
               );
             })}
 
-            {isLoading &&
+            {showInitialLoading &&
               Array.from({ length: 3 }).map((_, index) => (
                 <div
                   key={`portfolio-skeleton-${index}`}
@@ -371,7 +377,7 @@ export default function Portfolio() {
               ))}
           </div>
 
-          {!isLoading && filteredItems.length === 0 && (
+          {!showInitialLoading && filteredItems.length === 0 && (
             <div className="mt-12 text-center">
               <div className="inline-flex h-16 w-16 items-center justify-center rounded-full border border-dashed border-[#273149] text-sm font-semibold uppercase tracking-[0.32em] text-slate-500">
                 No
@@ -390,8 +396,7 @@ export default function Portfolio() {
 
         <motion.section
           initial="hidden"
-          whileInView="show"
-          viewport={{ once: true, amount: 0.35 }}
+          animate="show"
           variants={fadeUp}
           className="mx-auto mt-20 max-w-5xl text-center"
         >
@@ -406,7 +411,7 @@ export default function Portfolio() {
             </p>
             <div className="relative mt-8 flex flex-col gap-4 sm:flex-row sm:justify-center">
               <a
-                href="https://wa.me/6281532797240?text=Halo%20CodingBoy!%20Saya%20tertarik%20dengan%20portfolio%20Anda%20dan%20ingin%20diskusi%20proyek."
+                href="https://wa.me/6285609408506?text=Halo%20CodingBoy!%20Saya%20tertarik%20dengan%20portfolio%20Anda%20dan%20ingin%20diskusi%20proyek."
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-[#6d6bff] to-[#a855f7] px-7 py-3 text-sm font-semibold text-white shadow-[0_18px_45px_rgba(104,97,255,0.45)] transition-all hover:shadow-[0_22px_55px_rgba(104,97,255,0.55)]"

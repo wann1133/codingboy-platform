@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono, Anton, IBM_Plex_Mono } from "next/font/google";
-import WhatsAppFloat from '@/components/WhatsAppFloat';
 import SnappyCTAs from '@/components/SnappyCTAs';
+import WhatsAppFloatWrapper from '@/components/WhatsAppFloatWrapper';
 import { LanguageProvider } from '@/components/LanguageContext';
 import "./globals.css";
 
@@ -45,7 +45,7 @@ export default function RootLayout({
         <LanguageProvider>
           {children}
           <SnappyCTAs />
-          <WhatsAppFloat 
+          <WhatsAppFloatWrapper 
             phoneNumber={process.env.WHATSAPP_PHONE_NUMBER || "+62881025741054"}
             defaultMessage="Halo CodingBoy! Saya tertarik dengan layanan pembuatan website. Bisa konsultasi gratis?"
           />

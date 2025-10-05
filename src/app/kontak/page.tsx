@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useState } from 'react';
 import { motion } from 'framer-motion';
@@ -57,26 +57,40 @@ export default function Kontak() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    
-    // Simulate form submission
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    
-    setIsSubmitting(false);
-    setIsSubmitted(true);
-    
-    // Reset form after 3 seconds
-    setTimeout(() => {
-      setIsSubmitted(false);
-      setFormData({
-        name: '',
-        email: '',
-        phone: '',
-        service: '',
-        budget: '',
-        timeline: '',
-        message: ''
+
+    try {
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
       });
-    }, 3000);
+
+      if (!response.ok) {
+        throw new Error('Failed to send message');
+      }
+
+      setIsSubmitting(false);
+      setIsSubmitted(true);
+
+      setTimeout(() => {
+        setIsSubmitted(false);
+        setFormData({
+          name: '',
+          email: '',
+          phone: '',
+          service: '',
+          budget: '',
+          timeline: '',
+          message: ''
+        });
+      }, 3000);
+    } catch (error) {
+      console.error(error);
+      setIsSubmitting(false);
+      // You might want to show an error message to the user
+    }
   };
 
   const contactInfo = [
@@ -88,7 +102,7 @@ export default function Kontak() {
       color: "text-green-400",
       action: () =>
         window.open(
-          `https://wa.me/6281532797240?text=${encodeURIComponent("Halo CodingBoy! Saya ingin konsultasi tentang pembuatan website.")}`,
+          `https://wa.me/6285609408506?text=${encodeURIComponent("Halo CodingBoy! Saya ingin konsultasi tentang pembuatan website.")}`,
           '_blank',
         )
     },
@@ -106,7 +120,7 @@ export default function Kontak() {
       value: "+62 815-3279-7240",
       description: "Jam kerja: Senin-Sabtu 09:00-18:00",
       color: "text-purple-400",
-      action: () => window.open('tel:+6281532797240', '_blank')
+      action: () => window.open('tel:+6285609408506', '_blank')
     },
     {
       icon: <MapPin className="w-6 h-6" />,
@@ -188,7 +202,7 @@ export default function Kontak() {
             <div className="absolute bottom-0 right-1/3 h-24 w-24 rounded-full bg-[#a855f7]/20 blur-3xl" />
           </div>
           <span className="relative inline-flex items-center justify-center rounded-full border border-[#273149] bg-[#080f1f]/80 px-4 py-1 text-xs font-semibold uppercase tracking-[0.32em] text-[#8b5cf6]">
-            Let's Talk
+            Let&rsquo;s Talk
           </span>
           <h2 className="relative mt-6 text-4xl md:text-5xl font-bold text-white">
             Hubungi Kami
@@ -442,7 +456,7 @@ export default function Kontak() {
                 Langsung chat WhatsApp untuk konsultasi gratis dan mendapatkan penawaran khusus!
               </p>
               <a
-                href={`https://wa.me/6281532797240?text=${encodeURIComponent("Halo CodingBoy! Saya ingin konsultasi tentang pembuatan website.")}`}
+                href={`https://wa.me/6285609408506?text=${encodeURIComponent("Halo CodingBoy! Saya ingin konsultasi tentang pembuatan website.")}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex w-full items-center justify-center gap-2 rounded-full bg-gradient-to-r from-emerald-500 to-emerald-400 py-3 px-6 text-sm font-semibold text-[#04110c] transition-all hover:shadow-[0_18px_40px_rgba(16,185,129,0.45)]"
@@ -493,4 +507,5 @@ export default function Kontak() {
     </div>
   );
 }
+
 

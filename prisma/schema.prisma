@@ -82,7 +82,7 @@ model Portfolio {
   category    String
   image       String?
   url         String?
-  features    String // JSON string of features (SQLite doesn't support arrays)
+  features    String[]
   duration    String
   client      String?
   testimonial String?

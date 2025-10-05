@@ -133,7 +133,7 @@ export const blogSeedPayload = defaultBlogEntries.map((entry) => ({
   content: entry.content,
   image: entry.image ?? null,
   category: entry.category,
-  tags: JSON.stringify(entry.tags),
+  tags: entry.tags,
   readTime: entry.readTime,
   published: true,
   featured: entry.featured,
@@ -148,7 +148,7 @@ export const portfolioSeedPayload = defaultPortfolioEntries.map((entry) => ({
   category: entry.category,
   image: entry.image ?? null,
   url: entry.url ?? null,
-  features: JSON.stringify(entry.features),
+  features: entry.features,
   duration: entry.duration,
   client: entry.client ?? null,
   testimonial: entry.testimonial ?? null,
@@ -157,3 +157,5 @@ export const portfolioSeedPayload = defaultPortfolioEntries.map((entry) => ({
   featured: entry.featured,
   active: entry.active ?? true,
 }));
+
+

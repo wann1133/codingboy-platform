@@ -1,3 +1,4 @@
+import Link from 'next/link';
 export default function Page() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center p-4">
@@ -6,10 +7,11 @@ export default function Page() {
           CodingBoy
         </h1>
         <p className="text-gray-300 mb-6">Authentication dimatikan. Halaman daftar nonaktif.</p>
-        <a href="/" className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-all">
+        <Link href="/" className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-all">
           Kembali ke Beranda
-        </a>
+        </Link>
       </div>
     </div>
   );
 }
+

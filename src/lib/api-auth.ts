@@ -10,7 +10,7 @@ export class UnauthenticatedError extends Error {
 }
 
 export async function getAdminSession() {
-  const cookieStore = cookies();
+  const cookieStore = await cookies();
   const token = cookieStore.get(adminSessionConfig.cookieName)?.value;
 
   if (!token) {

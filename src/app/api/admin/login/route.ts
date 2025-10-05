@@ -22,8 +22,9 @@ export async function POST(request: Request) {
 
   const token = await createAdminSessionToken({ email });
   const cookie = createAdminSessionCookie(token);
+  const cookieStore = await cookies();
 
-  cookies().set(cookie.name, cookie.value, cookie.options);
+  cookieStore.set(cookie.name, cookie.value, cookie.options);
 
   return NextResponse.json({ success: true });
 }

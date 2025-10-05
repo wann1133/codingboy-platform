@@ -13,6 +13,7 @@ const fadeUp = {
   show: { opacity: 1, y: 0, transition: { ease: 'easeOut', duration: 0.6 } },
 } as const;
 
+
 const defaultCategories = [
   'Semua',
   'Tutorial Web',
@@ -86,6 +87,19 @@ const fallbackBlogPosts: BlogPost[] = defaultBlogEntries.map((entry, index) => (
   readTime: entry.readTime,
 }));
 
+const deriveCategories = (posts: BlogPost[]): string[] => {
+  const categories = new Set<string>(defaultCategories);
+
+  posts.forEach((post) => {
+    const category = post.category?.trim();
+    if (category) {
+      categories.add(category);
+    }
+  });
+
+  return Array.from(categories);
+};
+
 const formatDate = (value: string | null) => {
   if (!value) {
     return 'Belum dijadwalkan';
@@ -121,12 +135,17 @@ export default function Blog() {
   } as const;
   const navLabels = navCopy[(lang as 'id' | 'en') || 'id'];
 
-  const [posts, setPosts] = useState<BlogPost[]>([]);
-  const [categories, setCategories] = useState<string[]>([...defaultCategories]);
+  const [posts, setPosts] = useState<BlogPost[]>(fallbackBlogPosts);
+  const [categories, setCategories] = useState<string[]>(deriveCategories(fallbackBlogPosts));
   const [searchTerm, setSearchTerm] = useState('');
   const [activeCategory, setActiveCategory] = useState<string>('Semua');
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isHydrated, setIsHydrated] = useState(false);
+
+  useEffect(() => {
+    setIsHydrated(true);
+  }, []);
 
   useEffect(() => {
     let isMounted = true;
@@ -160,10 +179,7 @@ export default function Blog() {
       } catch (err) {
         if (!isMounted) return;
         setPosts(fallbackBlogPosts);
-        const dynamicCategories = Array.from(
-          new Set(fallbackBlogPosts.map((post) => post.category).filter(Boolean)),
-        );
-        setCategories(['Semua', ...dynamicCategories.filter((cat) => cat !== 'Semua')]);
+        setCategories(deriveCategories(fallbackBlogPosts));
         setError(err instanceof Error ? err.message : 'Terjadi kesalahan saat memuat artikel.');
       } finally {
         if (isMounted) {
@@ -207,6 +223,8 @@ export default function Blog() {
     });
   }, [activeCategory, posts, searchTerm]);
 
+  const showInitialLoading = isLoading && posts.length === 0;
+
   return (
     <div className="relative min-h-screen overflow-hidden bg-[#05070d] text-slate-100">
       <div className="pointer-events-none absolute inset-0 -z-10">
@@ -217,11 +235,10 @@ export default function Blog() {
 
       <PrimaryNav labels={navLabels} />
 
-      <main className="pt-28 pb-24">
+      <main className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 pt-32 pb-24">
         <motion.section
           initial="hidden"
-          whileInView="show"
-          viewport={{ once: true, amount: 0.4 }}
+          animate="show"
           variants={fadeUp}
           className="relative mx-auto mb-16 max-w-5xl overflow-hidden rounded-3xl border border-[#1b253a] bg-gradient-to-br from-[#0f172a]/85 to-[#050a18]/90 p-12 text-center shadow-[0_32px_90px_rgba(5,10,25,0.55)]"
         >
@@ -242,8 +259,7 @@ export default function Blog() {
 
         <motion.section
           initial="hidden"
-          whileInView="show"
-          viewport={{ once: true, amount: 0.4 }}
+          animate="show"
           variants={fadeUp}
           className="mx-auto mb-12 flex max-w-5xl flex-col gap-6 md:flex-row md:items-center md:justify-between"
         >
@@ -258,42 +274,43 @@ export default function Blog() {
             />
           </div>
           <div className="text-sm text-slate-400">
-            {isLoading ? 'Memuat artikel...' : `${posts.length} artikel tersedia`}
+            {showInitialLoading ? 'Memuat artikel...' : `${posts.length} artikel tersedia`}
           </div>
         </motion.section>
 
-        <motion.section
-          initial="hidden"
-          whileInView="show"
-          viewport={{ once: true, amount: 0.4 }}
-          variants={fadeUp}
-          className="mx-auto mb-12 max-w-5xl"
-        >
-          <div className="flex flex-wrap justify-center gap-3">
-            {categories.map((category) => (
-              <button
-                key={category}
-                onClick={() => setActiveCategory(category)}
-                className={`rounded-full border px-5 py-2.5 text-sm font-medium transition-all ${
-                  activeCategory === category
-                    ? 'border-[#6d6bff] bg-gradient-to-r from-[#6d6bff] to-[#a855f7] text-white shadow-[0_18px_45px_rgba(104,97,255,0.45)]'
-                    : 'border-[#273149] bg-[#0b1324]/70 text-slate-300 hover:border-[#6d6bff] hover:text-white'
-                }`}
-              >
-                {category}
-              </button>
-            ))}
-          </div>
-          {error && !isLoading && (
-            <p className="mt-4 text-center text-sm text-red-300">{error}</p>
-          )}
-        </motion.section>
-
-        {(featuredPosts.length > 0 || isLoading) && (
+        {isHydrated && (
           <motion.section
             initial="hidden"
-            whileInView="show"
-            viewport={{ once: true, amount: 0.35 }}
+            animate="show"
+            variants={fadeUp}
+            className="mx-auto mb-12 max-w-5xl"
+          >
+            <div className="flex flex-wrap justify-center gap-3">
+              {categories.map((category) => (
+                <button
+                  key={category}
+                  onClick={() => setActiveCategory(category)}
+                  className={`rounded-full border px-5 py-2.5 text-sm font-medium transition-all ${
+                    activeCategory === category
+                      ? 'border-[#6d6bff] bg-gradient-to-r from-[#6d6bff] to-[#a855f7] text-white shadow-[0_18px_45px_rgba(104,97,255,0.45)]'
+                      : 'border-[#273149] bg-[#0b1324]/70 text-slate-300 hover:border-[#6d6bff] hover:text-white'
+                  }`}
+                >
+                  {category}
+                </button>
+              ))}
+            </div>
+            {error && !showInitialLoading && (
+              <p className="mt-4 text-center text-sm text-red-300">{error}</p>
+            )}
+          </motion.section>
+        )}
+
+        {(featuredPosts.length > 0 || showInitialLoading) && (
+          <motion.section
+            initial="hidden"
+            animate="show"
+            
             variants={fadeUp}
             className="mx-auto mb-16 max-w-6xl"
           >
@@ -306,8 +323,8 @@ export default function Blog() {
                 <motion.article
                   key={post.id}
                   initial={{ opacity: 0, y: 28 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true, amount: 0.5 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  
                   transition={{ delay: index * 0.08, duration: 0.55, ease: 'easeOut' }}
                   className="group flex h-full flex-col overflow-hidden rounded-3xl border border-[#1f2b42] bg-[#080f1f]/80 shadow-[0_22px_60px_rgba(5,10,25,0.45)] transition-all hover:border-[#6d6bff]"
                 >
@@ -330,7 +347,10 @@ export default function Blog() {
                       <span>{formatDate(post.publishedAt)}</span>
                       <span>{post.readTime ?? '—'}</span>
                     </div>
-                    <button className="inline-flex items-center gap-2 text-sm font-semibold text-[#8b5cf6] transition-transform hover:translate-x-1">
+                    <button
+                      className="inline-flex items-center gap-2 text-sm font-semibold text-[#8b5cf6] transition-transform hover:translate-x-1"
+                      suppressHydrationWarning
+                    >
                       Baca selengkapnya
                       <ArrowRight className="h-4 w-4" />
                     </button>
@@ -338,13 +358,13 @@ export default function Blog() {
                 </motion.article>
               ))}
 
-              {!featuredPosts.length && !isLoading && (
+              {!featuredPosts.length && !showInitialLoading && (
                 <div className="col-span-1 flex flex-col items-center justify-center rounded-3xl border border-dashed border-[#1f2b42] bg-[#080f1f]/60 p-10 text-center text-sm text-slate-400 lg:col-span-3">
                   Belum ada artikel highlight yang dipublikasikan.
                 </div>
               )}
 
-              {isLoading && (
+              {showInitialLoading && (
                 <div className="col-span-1 flex flex-col items-center justify-center rounded-3xl border border-[#1f2b42] bg-[#080f1f]/60 p-10 text-center text-sm text-slate-400 lg:col-span-3">
                   Memuat artikel unggulan...
                 </div>
@@ -355,8 +375,7 @@ export default function Blog() {
 
         <motion.section
           initial="hidden"
-          whileInView="show"
-          viewport={{ once: true, amount: 0.35 }}
+          animate="show"
           variants={fadeUp}
           className="mx-auto max-w-6xl"
         >
@@ -366,7 +385,7 @@ export default function Blog() {
               <p className="text-sm text-slate-400">Kurasi mingguan tentang strategi web, growth, dan praktik terbaik digital.</p>
             </div>
             <span className="text-sm text-slate-500">
-              {isLoading ? 'Memuat artikel...' : `${filteredPosts.length} artikel ditemukan`}
+              {showInitialLoading ? 'Memuat artikel...' : `${filteredPosts.length} artikel ditemukan`}
             </span>
           </div>
 
@@ -375,8 +394,7 @@ export default function Blog() {
               <motion.article
                 key={post.id}
                 initial={{ opacity: 0, y: 28 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, amount: 0.5 }}
+                animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.06, duration: 0.55, ease: 'easeOut' }}
                 className="group flex h-full flex-col overflow-hidden rounded-3xl border border-[#1f2b42] bg-[#080f1f]/75 shadow-[0_18px_45px_rgba(5,10,25,0.4)] transition-all hover:border-[#6d6bff]"
               >
@@ -401,7 +419,10 @@ export default function Blog() {
                     {post.title}
                   </h4>
                   <p className="text-sm text-slate-300 line-clamp-2">{post.excerpt ?? 'Belum ada ringkasan artikel.'}</p>
-                  <button className="inline-flex items-center gap-2 text-sm font-medium text-[#8b5cf6] transition-transform hover:translate-x-1">
+                  <button
+                    className="inline-flex items-center gap-2 text-sm font-medium text-[#8b5cf6] transition-transform hover:translate-x-1"
+                    suppressHydrationWarning
+                  >
                     Baca Artikel
                     <ArrowRight className="h-4 w-4" />
                   </button>
@@ -409,7 +430,7 @@ export default function Blog() {
               </motion.article>
             ))}
 
-            {isLoading &&
+            {showInitialLoading &&
               Array.from({ length: 3 }).map((_, index) => (
                 <div
                   key={`skeleton-${index}`}
@@ -420,7 +441,7 @@ export default function Blog() {
               ))}
           </div>
 
-          {filteredPosts.length === 0 && !isLoading && (
+          {filteredPosts.length === 0 && !showInitialLoading && (
             <div className="mt-12 text-center">
               <div className="inline-flex h-16 w-16 items-center justify-center rounded-full border border-dashed border-[#273149] text-sm font-semibold uppercase tracking-[0.32em] text-slate-500">
                 No
@@ -440,35 +461,38 @@ export default function Blog() {
           )}
         </motion.section>
 
-        <motion.section
-          initial="hidden"
-          whileInView="show"
-          viewport={{ once: true, amount: 0.35 }}
-          variants={fadeUp}
-          className="mx-auto mt-20 max-w-5xl"
-        >
-          <div className="relative overflow-hidden rounded-3xl border border-[#1b253a] bg-gradient-to-br from-[#0f172a]/85 to-[#050a18]/90 p-12 text-center shadow-[0_32px_90px_rgba(5,10,25,0.55)]">
-            <div className="pointer-events-none absolute inset-0">
-              <div className="absolute left-1/2 top-0 h-32 w-[120%] -translate-x-1/2 bg-gradient-to-r from-transparent via-[#6d6bff]/15 to-transparent blur-2xl" />
-              <div className="absolute bottom-0 right-1/3 h-24 w-24 rounded-full bg-[#38bdf8]/20 blur-3xl" />
+        {isHydrated && (
+          <motion.section
+            initial="hidden"
+            animate="show"
+            variants={fadeUp}
+            className="mx-auto mt-20 max-w-5xl"
+          >
+            <div className="relative overflow-hidden rounded-3xl border border-[#1b253a] bg-gradient-to-br from-[#0f172a]/85 to-[#050a18]/90 p-12 text-center shadow-[0_32px_90px_rgba(5,10,25,0.55)]">
+              <div className="pointer-events-none absolute inset-0">
+                <div className="absolute left-1/2 top-0 h-32 w-[120%] -translate-x-1/2 bg-gradient-to-r from-transparent via-[#6d6bff]/15 to-transparent blur-2xl" />
+                <div className="absolute bottom-0 right-1/3 h-24 w-24 rounded-full bg-[#38bdf8]/20 blur-3xl" />
+              </div>
+              <h2 className="relative text-3xl font-semibold text-white md:text-4xl">Dapatkan insight terbaru langsung ke inbox</h2>
+              <p className="relative mt-4 text-lg text-slate-300">
+                Subscribe newsletter kami untuk mendapatkan tips, tutorial, dan update tren seputar website & digital marketing.
+              </p>
+              <div className="relative mt-8 flex flex-col gap-4 sm:flex-row sm:justify-center">
+                <input
+                  type="email"
+                  placeholder="Masukkan email Anda"
+                  className="w-full rounded-full border border-[#273149] bg-[#0b1324]/70 px-5 py-3 text-sm text-slate-200 placeholder:text-slate-500 focus:border-[#6d6bff] focus:outline-none focus:ring-2 focus:ring-[#6d6bff]/40 sm:w-72"
+                />
+                <button
+                  className="inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-[#6d6bff] to-[#a855f7] px-7 py-3 text-sm font-semibold text-white transition-all hover:shadow-[0_18px_45px_rgba(104,97,255,0.45)]"
+                >
+                  Subscribe
+                </button>
+              </div>
+              <p className="relative mt-4 text-xs uppercase tracking-[0.28em] text-slate-500">Gratis dan bisa unsubscribe kapan saja</p>
             </div>
-            <h2 className="relative text-3xl font-semibold text-white md:text-4xl">Dapatkan insight terbaru langsung ke inbox</h2>
-            <p className="relative mt-4 text-lg text-slate-300">
-              Subscribe newsletter kami untuk mendapatkan tips, tutorial, dan update tren seputar website & digital marketing.
-            </p>
-            <div className="relative mt-8 flex flex-col gap-4 sm:flex-row sm:justify-center">
-              <input
-                type="email"
-                placeholder="Masukkan email Anda"
-                className="w-full rounded-full border border-[#273149] bg-[#0b1324]/70 px-5 py-3 text-sm text-slate-200 placeholder:text-slate-500 focus:border-[#6d6bff] focus:outline-none focus:ring-2 focus:ring-[#6d6bff]/40 sm:w-72"
-              />
-              <button className="inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-[#6d6bff] to-[#a855f7] px-7 py-3 text-sm font-semibold text-white transition-all hover:shadow-[0_18px_45px_rgba(104,97,255,0.45)]">
-                Subscribe
-              </button>
-            </div>
-            <p className="relative mt-4 text-xs uppercase tracking-[0.28em] text-slate-500">Gratis dan bisa unsubscribe kapan saja</p>
-          </div>
-        </motion.section>
+          </motion.section>
+        )}
       </main>
     </div>
   );

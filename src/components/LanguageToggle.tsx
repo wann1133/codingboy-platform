@@ -11,8 +11,10 @@ export default function LanguageToggle() {
       className="inline-flex items-center gap-1 rounded-full border border-[#273249] bg-[#0f1628] p-1 text-[0.7rem] select-none shadow-[0_8px_24px_rgba(0,0,0,0.35)]"
       role="group"
       aria-label="Language toggle"
+      suppressHydrationWarning
     >
       <button
+        suppressHydrationWarning
         type="button"
         onClick={() => setLang("id")}
         className={`px-2.5 py-1 rounded-full font-medium transition-colors ${
@@ -22,6 +24,7 @@ export default function LanguageToggle() {
         ID
       </button>
       <button
+        suppressHydrationWarning
         type="button"
         onClick={() => setLang("en")}
         className={`px-2.5 py-1 rounded-full font-medium transition-colors ${
