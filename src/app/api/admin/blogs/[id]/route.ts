@@ -1,5 +1,5 @@
 import { Prisma } from '@prisma/client';
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 
 import { UnauthenticatedError, requireAdminSession } from '@/lib/api-auth';
 import prisma from '@/lib/prisma';
@@ -11,7 +11,7 @@ const slugify = (value: string) =>
     .trim()
     .replace(/\s+/g, '-');
 
-export async function GET(request: Request, { params }: { params: { id: string } }) {
+export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     await requireAdminSession();
   } catch (error) {
@@ -35,7 +35,7 @@ export async function GET(request: Request, { params }: { params: { id: string }
   return NextResponse.json({ post });
 }
 
-export async function PUT(request: Request, { params }: { params: { id: string } }) {
+export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     await requireAdminSession();
   } catch (error) {
@@ -110,7 +110,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
   }
 }
 
-export async function DELETE(request: Request, { params }: { params: { id: string } }) {
+export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     await requireAdminSession();
   } catch (error) {
