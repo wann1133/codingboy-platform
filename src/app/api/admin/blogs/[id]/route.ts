@@ -11,7 +11,8 @@ const slugify = (value: string) =>
     .trim()
     .replace(/\s+/g, '-');
 
-export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(request: NextRequest, context: { params: { id: string } }) {
+  const { params } = context;
   try {
     await requireAdminSession();
   } catch (error) {
@@ -35,7 +36,8 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
   return NextResponse.json({ post });
 }
 
-export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
+export async function PUT(request: NextRequest, context: { params: { id: string } }) {
+  const { params } = context;
   try {
     await requireAdminSession();
   } catch (error) {
@@ -110,7 +112,8 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
   }
 }
 
-export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(request: NextRequest, context: { params: { id: string } }) {
+  const { params } = context;
   try {
     await requireAdminSession();
   } catch (error) {
