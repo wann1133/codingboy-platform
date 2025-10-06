@@ -1,25 +1,31 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
+// ==========================================
+// Prisma Schema — Optimized for Supabase & Vercel
+// ==========================================
 
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider  = "postgresql"
-  url       = env("DATABASE_URL")
-  directUrl = env("DATABASE_URL")
+  provider          = "postgresql"
+  url               = env("DATABASE_URL")
+  directUrl         = env("DIRECT_DATABASE_URL") // gunakan env DIRECT_DATABASE_URL agar aman di production
+  shadowDatabaseUrl = env("SHADOW_DATABASE_URL") // optional, dipakai saat migrate di CI/CD (optional)
 }
 
+// ==========================================
+// MODELS
+// ==========================================
+
 model User {
-  id        String   @id @default(cuid())
-  clerkId   String   @unique
-  email     String   @unique
-  firstName String?
-  lastName  String?
-  phone     String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id          String   @id @default(cuid())
+  clerkId     String   @unique
+  email       String   @unique
+  firstName   String?
+  lastName    String?
+  phone       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   // Relations
   projects     Project[]
@@ -30,13 +36,13 @@ model User {
 }
 
 model Service {
-  id          String  @id @default(cuid())
+  id          String   @id @default(cuid())
   name        String
-  slug        String  @unique
+  slug        String   @unique
   description String
   price       Int
   duration    String
-  features    String // JSON string of features for portability
+  features    String
   popular     Boolean  @default(false)
   active      Boolean  @default(true)
   createdAt   DateTime @default(now())
@@ -82,7 +88,7 @@ model Portfolio {
   category    String
   image       String?
   url         String?
-  features    String[]
+  features    String[] // array string sudah bagus di PostgreSQL
   duration    String
   client      String?
   testimonial String?
@@ -125,7 +131,7 @@ model BlogPost {
   content     String
   image       String?
   category    String
-  tags        String // JSON string of tags for portability
+  tags        String   // JSON string masih oke untuk portability
   readTime    String?
   published   Boolean  @default(false)
   featured    Boolean  @default(false)
@@ -134,11 +140,12 @@ model BlogPost {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
+  @@index([slug])
   @@map("blog_posts")
 }
 
 model Inquiry {
-  id          String      @id @default(cuid())
+  id          String        @id @default(cuid())
   name        String
   email       String
   phone       String?
@@ -146,10 +153,10 @@ model Inquiry {
   budget      String?
   message     String
   status      InquiryStatus @default(NEW)
-  responded   Boolean     @default(false)
+  responded   Boolean       @default(false)
   respondedAt DateTime?
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
 
   // Foreign Keys
   userId String?
@@ -173,6 +180,10 @@ model Payment {
 
   @@map("payments")
 }
+
+// ==========================================
+// ENUMS
+// ==========================================
 
 enum ProjectStatus {
   PENDING

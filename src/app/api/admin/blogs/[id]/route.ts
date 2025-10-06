@@ -11,23 +11,23 @@ const slugify = (value: string) =>
     .trim()
     .replace(/\s+/g, '-');
 
+/**
+ * GET /api/admin/blogs/[id]
+ * Ambil detail blog berdasarkan ID
+ */
 export async function GET(request: NextRequest, context: { params: { id: string } }) {
-  const { params } = context;
+  const { id } = context.params;
+
   try {
     await requireAdminSession();
   } catch (error) {
     if (error instanceof UnauthenticatedError) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
-
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 
-  const { id } = params;
-
-  const post = await prisma.blogPost.findUnique({
-    where: { id },
-  });
+  const post = await prisma.blogPost.findUnique({ where: { id } });
 
   if (!post) {
     return NextResponse.json({ error: 'Blog post not found.' }, { status: 404 });
@@ -36,21 +36,23 @@ export async function GET(request: NextRequest, context: { params: { id: string 
   return NextResponse.json({ post });
 }
 
+/**
+ * PUT /api/admin/blogs/[id]
+ * Update blog berdasarkan ID
+ */
 export async function PUT(request: NextRequest, context: { params: { id: string } }) {
-  const { params } = context;
+  const { id } = context.params;
+
   try {
     await requireAdminSession();
   } catch (error) {
     if (error instanceof UnauthenticatedError) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
-
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 
-  const { id } = params;
   const body = await request.json().catch(() => null);
-
   if (!body) {
     return NextResponse.json({ error: 'Payload tidak valid.' }, { status: 400 });
   }
@@ -69,7 +71,10 @@ export async function PUT(request: NextRequest, context: { params: { id: string 
   } = body;
 
   if (!title || !content || !category) {
-    return NextResponse.json({ error: 'Judul, kategori, dan konten wajib diisi.' }, { status: 400 });
+    return NextResponse.json(
+      { error: 'Judul, kategori, dan konten wajib diisi.' },
+      { status: 400 }
+    );
   }
 
   const slug = slugify(title);
@@ -92,13 +97,17 @@ export async function PUT(request: NextRequest, context: { params: { id: string 
                 .map((tag: string) => tag.trim())
                 .filter(Boolean)
             : Array.isArray(tags)
-              ? tags
-              : [],
+            ? tags
+            : []
         ),
         readTime: readTime ?? null,
         published,
         featured: Boolean(featured),
-        publishedAt: published ? (publishedAt ? new Date(publishedAt) : new Date()) : null,
+        publishedAt: published
+          ? publishedAt
+            ? new Date(publishedAt)
+            : new Date()
+          : null,
       },
     });
 
@@ -112,25 +121,24 @@ export async function PUT(request: NextRequest, context: { params: { id: string 
   }
 }
 
+/**
+ * DELETE /api/admin/blogs/[id]
+ * Hapus blog berdasarkan ID
+ */
 export async function DELETE(request: NextRequest, context: { params: { id: string } }) {
-  const { params } = context;
+  const { id } = context.params;
+
   try {
     await requireAdminSession();
   } catch (error) {
     if (error instanceof UnauthenticatedError) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
-
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 
-  const { id } = params;
-
   try {
-    await prisma.blogPost.delete({
-      where: { id },
-    });
-
+    await prisma.blogPost.delete({ where: { id } });
     return NextResponse.json({ message: 'Blog post deleted successfully.' }, { status: 200 });
   } catch {
     return NextResponse.json({ error: 'Failed to delete blog post.' }, { status: 500 });
