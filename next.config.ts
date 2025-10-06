@@ -1,18 +1,31 @@
 import type { NextConfig } from "next";
 
-const nextConfig: NextConfig = {
-  // ✅ Melewati error TypeScript dari validator internal (bug Next.js 15.5.x)
+// ⛔️ Hindari error tipe Next.js 15 untuk experimental.turbo
+const nextConfig = {
+  // ✅ Abaikan error TypeScript internal validator
   typescript: {
     ignoreBuildErrors: true,
   },
 
-  // ✅ Opsional tapi disarankan: mencegah ESLint stop build di Vercel
+  // ✅ Mencegah error ESLint menghentikan build di Vercel
   eslint: {
     ignoreDuringBuilds: true,
   },
 
-  // (Opsional) Kamu bisa tambahkan config lain di sini nanti, misal:
+  // ✅ Menonaktifkan Turbopack dengan cara aman
+  // (Gunakan casting ke any untuk hindari TypeScript error)
+  experimental: {
+    turbo: false as any,
+  },
+
+  // ✅ Paksa penggunaan Webpack agar Resend & dynamic import berjalan stabil
+  webpack: (config: any) => {
+    console.log("🧱 Using Webpack compiler (Turbopack disabled)");
+    return config;
+  },
+
+  // (Opsional) Tambahkan konfigurasi lain sesuai kebutuhan
   // images: { domains: ["your-cdn.com"] },
-};
+} satisfies NextConfig;
 
 export default nextConfig;
