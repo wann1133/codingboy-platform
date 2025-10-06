@@ -1,19 +1,22 @@
 #!/usr/bin/env bash
-set -e
+set -e  # Stop build jika ada error di mana pun
 
 echo "====================================="
-echo "🚀 Prisma + Next.js Production Build"
+echo "🚀 Prisma + Next.js Production Build (Vercel)"
 echo "====================================="
 
-# Generate Prisma Client
+# 1️⃣ Generate Prisma Client
 echo "🔄 Running Prisma generate..."
 npx prisma generate || { echo "❌ Prisma generate failed"; exit 1; }
 
-# Disable Turbopack (karena menyebabkan error @react-email/render)
+# 2️⃣ Disable Turbopack (karena masih bug di Next 15.x)
 export NEXT_DISABLE_TURBOPACK=1
 
-# Build Next.js project
-echo "🧱 Building Next.js with Webpack..."
-npm run build || { echo "❌ Build failed"; exit 1; }
+# 3️⃣ Pastikan NODE_ENV=production
+export NODE_ENV=production
 
-echo "✅ Build completed successfully."
+# 4️⃣ Build Next.js pakai Webpack
+echo "🧱 Building Next.js with Webpack..."
+next build || { echo "❌ Build failed"; exit 1; }
+
+echo "✅ Build completed successfully!"
