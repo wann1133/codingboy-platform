@@ -2,11 +2,6 @@
   "version": 2,
   "buildCommand": "bash ./prisma/vercel-build.sh",
   "env": {
-    "DATABASE_URL": "@database_url",
-    "DIRECT_DATABASE_URL": "@direct_database_url",
-    "SHADOW_DATABASE_URL": "@shadow_database_url",
-    "RESEND_API_KEY": "@resend_api_key",
-    "NEXTAUTH_SECRET": "@nextauth_secret",
     "NEXT_DISABLE_TURBOPACK": "1"
   }
 }
