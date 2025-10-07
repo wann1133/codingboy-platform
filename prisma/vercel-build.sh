@@ -17,6 +17,7 @@ export NODE_ENV=production
 
 # 4️⃣ Build Next.js pakai Webpack
 echo "🧱 Building Next.js with Webpack..."
-next build || { echo "❌ Build failed"; exit 1; }
+npx next build || { echo "❌ Build failed"; exit 1; }
+
 
 echo "✅ Build completed successfully!"
