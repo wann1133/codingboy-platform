@@ -7,6 +7,7 @@ echo "====================================="
 
 # 1️⃣ Generate Prisma Client
 echo "🔄 Running Prisma generate..."
+ls -la prisma/
 npx prisma generate || { echo "❌ Prisma generate failed"; exit 1; }
 
 # 2️⃣ Disable Turbopack (karena masih bug di Next 15.x)
