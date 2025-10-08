@@ -7,9 +7,12 @@ const prisma = new PrismaClient();
 const SESSION_COOKIE = 'admin_session';
 const TOKEN_EXPIRATION = '7d';
 const DEV_FALLBACK_SECRET = 'dev-secret-key-change-me';
-const DEFAULT_ADMIN_EMAIL = 'admin@codingboy.dev';
-const DEFAULT_ADMIN_PASSWORD_HASH = '$2b$12$UFYEOyZd8/A3.taX5FBXEOTBT6zUzJu0DrrFECU7s9SKNWsFCpmYe';
-
+const DEFAULT_ADMIN_EMAIL =  
+  process.env.NODE_ENV === 'production' ? '' : 'admin@codingboy.dev';
+const DEFAULT_ADMIN_PASSWORD_HASH =   
+  process.env.NODE_ENV === 'production'
+    ? ''
+    : '$2b$12$UFYEOyZd8/A3.taX5FBXEOTBT6zUzJu0DrrFECU7s9SKNWsFCpmYe';
 const resolveTokenSecret = () => {
   if (process.env.ADMIN_TOKEN_SECRET) {
     return process.env.ADMIN_TOKEN_SECRET;

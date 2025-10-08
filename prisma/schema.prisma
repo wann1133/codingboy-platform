@@ -1,6 +1,7 @@
-// ==========================================
-// Prisma Schema — Optimized for Supabase & Vercel
-// ==========================================
+// ===========================================
+// 🔧 Prisma Schema for CodingBoy Platform
+// Compatible with Prisma 6.16.x & Supabase
+// ===========================================
 
 generator client {
   provider = "prisma-client-js"
@@ -9,51 +10,57 @@ generator client {
 datasource db {
   provider          = "postgresql"
   url               = env("DATABASE_URL")
-  directUrl         = env("DIRECT_DATABASE_URL") // gunakan env DIRECT_DATABASE_URL agar aman di production
-  shadowDatabaseUrl = env("SHADOW_DATABASE_URL") // optional, dipakai saat migrate di CI/CD (optional)
+  directUrl         = env("DIRECT_DATABASE_URL")
+  shadowDatabaseUrl = env("SHADOW_DATABASE_URL")
 }
 
-// ==========================================
-// MODELS
-// ==========================================
-
+// ===========================================
+// 👤 USER MODEL
+// ===========================================
 model User {
-  id          String   @id @default(cuid())
-  clerkId     String   @unique
-  email       String   @unique
-  firstName   String?
-  lastName    String?
-  phone       String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id           String        @id @default(cuid())
+  clerkId      String        @unique
+  email        String        @unique
+  password     String        @default("changeme") // Default fallback; gunakan hash di production
+  firstName    String?
+  lastName     String?
+  phone        String?
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
 
   // Relations
+  inquiries    Inquiry[]
   projects     Project[]
   testimonials Testimonial[]
-  inquiries    Inquiry[]
 
   @@map("users")
 }
 
+// ===========================================
+// 🧩 SERVICE MODEL
+// ===========================================
 model Service {
-  id          String   @id @default(cuid())
+  id          String    @id @default(cuid())
   name        String
-  slug        String   @unique
+  slug        String    @unique
   description String
   price       Int
   duration    String
-  features    String
-  popular     Boolean  @default(false)
-  active      Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  features    String     // JSON string (portable for frontend)
+  popular     Boolean    @default(false)
+  active      Boolean    @default(true)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
 
   // Relations
-  projects Project[]
+  projects    Project[]
 
   @@map("services")
 }
 
+// ===========================================
+// 🚧 PROJECT MODEL
+// ===========================================
 model Project {
   id          String        @id @default(cuid())
   name        String
@@ -70,16 +77,19 @@ model Project {
   updatedAt   DateTime      @updatedAt
 
   // Foreign Keys
-  userId    String
-  serviceId String
+  userId      String
+  serviceId   String
 
   // Relations
-  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  service Service @relation(fields: [serviceId], references: [id])
+  service     Service       @relation(fields: [serviceId], references: [id])
+  user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("projects")
 }
 
+// ===========================================
+// 💼 PORTFOLIO MODEL
+// ===========================================
 model Portfolio {
   id          String   @id @default(cuid())
   title       String
@@ -88,7 +98,6 @@ model Portfolio {
   category    String
   image       String?
   url         String?
-  features    String[] // array string sudah bagus di PostgreSQL
   duration    String
   client      String?
   testimonial String?
@@ -98,10 +107,14 @@ model Portfolio {
   status      String   @default("ongoing")
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+  features    String[]  // Array of features (Postgres supports text[])
 
   @@map("portfolios")
 }
 
+// ===========================================
+// 💬 TESTIMONIAL MODEL
+// ===========================================
 model Testimonial {
   id        String   @id @default(cuid())
   name      String
@@ -114,36 +127,39 @@ model Testimonial {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  // Foreign Keys
-  userId String?
-
   // Relations
-  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
 
   @@map("testimonials")
 }
 
+// ===========================================
+// 📝 BLOG MODEL
+// ===========================================
 model BlogPost {
-  id          String   @id @default(cuid())
+  id          String    @id @default(cuid())
   title       String
-  slug        String   @unique
+  slug        String    @unique
   excerpt     String?
   content     String
   image       String?
   category    String
-  tags        String   // JSON string masih oke untuk portability
+  tags        String     // JSON stringified array (portable for frontend)
   readTime    String?
-  published   Boolean  @default(false)
-  featured    Boolean  @default(false)
-  views       Int      @default(0)
+  published   Boolean   @default(false)
+  featured    Boolean   @default(false)
+  views       Int       @default(0)
   publishedAt DateTime?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 
-  @@index([slug])
   @@map("blog_posts")
 }
 
+// ===========================================
+// 📩 INQUIRY MODEL
+// ===========================================
 model Inquiry {
   id          String        @id @default(cuid())
   name        String
@@ -158,15 +174,16 @@ model Inquiry {
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
 
-  // Foreign Keys
-  userId String?
-
   // Relations
-  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+  userId      String?
+  user        User?         @relation(fields: [userId], references: [id], onDelete: SetNull)
 
   @@map("inquiries")
 }
 
+// ===========================================
+// 💳 PAYMENT MODEL
+// ===========================================
 model Payment {
   id            String        @id @default(cuid())
   orderId       String        @unique
@@ -181,10 +198,9 @@ model Payment {
   @@map("payments")
 }
 
-// ==========================================
-// ENUMS
-// ==========================================
-
+// ===========================================
+// 🔢 ENUMS
+// ===========================================
 enum ProjectStatus {
   PENDING
   IN_PROGRESS

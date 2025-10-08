@@ -97,7 +97,7 @@ export default function Kontak() {
     {
       icon: <MessageCircle className="w-6 h-6" />,
       title: "WhatsApp",
-      value: "+62 815-3279-7240",
+      value: "+62 856-0940-8506",
       description: "Chat langsung untuk konsultasi cepat",
       color: "text-green-400",
       action: () =>

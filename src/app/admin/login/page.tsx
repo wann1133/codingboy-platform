@@ -76,11 +76,6 @@ export default function AdminLogin() {
           <p className="mt-2 text-sm text-slate-400">
             Gunakan kredensial admin untuk mengelola artikel, portofolio, dan insight bisnis.
           </p>
-          <p className="mt-3 text-xs text-slate-500">
-            Mode pengembangan: email <span className="font-mono text-slate-300">admin@codingboy.dev</span> dan
-            password <span className="font-mono text-slate-300">admin123</span> dapat digunakan bila variabel
-            lingkungan khusus belum diatur.
-          </p>
         </div>
 
           <form onSubmit={handleSubmit} className="space-y-5">
