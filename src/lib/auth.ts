@@ -1,5 +1,8 @@
+import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 import { SignJWT, jwtVerify } from 'jose';
+
+const prisma = new PrismaClient();
 
 const SESSION_COOKIE = 'admin_session';
 const TOKEN_EXPIRATION = '7d';
@@ -14,7 +17,7 @@ const resolveTokenSecret = () => {
 
   if (process.env.NODE_ENV !== 'production') {
     console.warn(
-      'ADMIN_TOKEN_SECRET is not configured. Falling back to a development-only secret. Set ADMIN_TOKEN_SECRET for production environments.',
+      'ADMIN_TOKEN_SECRET is not configured. Falling back to a dev secret. Set ADMIN_TOKEN_SECRET for production.',
     );
     return DEV_FALLBACK_SECRET;
   }
@@ -23,7 +26,6 @@ const resolveTokenSecret = () => {
 };
 
 const secretKey = () => new TextEncoder().encode(resolveTokenSecret());
-
 const resolveAdminEmail = () => process.env.ADMIN_EMAIL ?? DEFAULT_ADMIN_EMAIL;
 const resolveAdminPasswordHash = () => process.env.ADMIN_PASSWORD_HASH ?? DEFAULT_ADMIN_PASSWORD_HASH;
 
@@ -36,20 +38,24 @@ export type AdminSessionPayload = {
   email: string;
 };
 
-export const DEFAULT_ADMIN_CREDENTIALS = {
-  email: DEFAULT_ADMIN_EMAIL,
-  password: 'admin123',
-} as const;
-
+// 🧩 Verify Credentials (from .env or DB)
 export async function verifyAdminCredentials(email: string, password: string) {
   const adminEmail = resolveAdminEmail();
   const adminPasswordHash = resolveAdminPasswordHash();
 
-  if (email.toLowerCase() !== adminEmail.toLowerCase()) {
-    return false;
+  // 1️⃣ Fallback admin via .env
+  if (email.toLowerCase() === adminEmail.toLowerCase()) {
+    return bcrypt.compare(password, adminPasswordHash);
   }
 
-  return bcrypt.compare(password, adminPasswordHash);
+  // 2️⃣ Check admin in DB
+  const user = await prisma.user.findUnique({
+    where: { email },
+    select: { id: true, email: true, password: true },
+  });
+
+  if (!user?.password) return false;
+  return bcrypt.compare(password, user.password);
 }
 
 export async function createAdminSessionToken(payload: AdminSessionPayload) {
@@ -95,12 +101,4 @@ export function createAdminSessionCookie(token: string) {
       maxAge: adminSessionConfig.maxAge,
     },
   };
-}
-
-export function readTokenFromCookie(rawCookie: string | undefined) {
-  if (!rawCookie) {
-    return null;
-  }
-
-  return rawCookie;
 }

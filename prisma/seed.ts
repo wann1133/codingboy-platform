@@ -1,28 +1,58 @@
 import { PrismaClient } from '@prisma/client';
+import bcrypt from 'bcryptjs';
 
 import { blogSeedPayload, portfolioSeedPayload } from '@/lib/default-content';
-
 import { prepareTagsForPersist } from '@/lib/blog-tags';
 import { prepareFeaturesForPersist } from '@/lib/portfolio-features';
 
 const prisma = new PrismaClient();
 
+// 🧩 1. Seed Admin User
+async function seedAdmin() {
+  const adminEmail = 'admin@codingboy.com';
+  const adminPassword = 'maman123';
+  const hashedPassword = await bcrypt.hash(adminPassword, 10);
+
+  const existingAdmin = await prisma.user.findUnique({
+    where: { email: adminEmail },
+  });
+
+  if (existingAdmin) {
+    console.log('  • Admin user already exists, skipping');
+    return;
+  }
+
+  await prisma.user.create({
+    data: {
+      clerkId: 'seeded-admin',
+      email: adminEmail,
+      firstName: 'Admin',
+      lastName: 'CodingBoy',
+      phone: '08123456789',
+      password: hashedPassword,
+    },
+  });
+
+  console.log(`  ✅ Admin user created (${adminEmail} / ${adminPassword})`);
+}
+
+// 🧩 2. Seed Services
 async function seedServices() {
   const serviceData = [
     {
       name: 'Paket Starter',
       slug: 'paket-starter',
       description: 'Landing Page Profesional untuk bisnis kecil',
-      price: 1_500_000,
+      price: 1500000,
       duration: '3-5 hari',
-      features: [
+      features: JSON.stringify([
         'Landing Page Profesional',
         'Mobile Responsive',
         'Domain + Hosting 1 tahun',
         'WhatsApp Integration',
         'Basic SEO Setup',
         '1x Revisi Desain',
-      ],
+      ]),
       popular: false,
       active: true,
     },
@@ -30,9 +60,9 @@ async function seedServices() {
       name: 'Paket Business',
       slug: 'paket-business',
       description: 'Company Profile Lengkap untuk bisnis menengah',
-      price: 3_500_000,
+      price: 3500000,
       duration: '5-7 hari',
-      features: [
+      features: JSON.stringify([
         'Company Profile Lengkap',
         '5-7 Halaman',
         'Content Management System',
@@ -40,26 +70,8 @@ async function seedServices() {
         'Contact Forms',
         'Social Media Integration',
         '2x Revisi Desain',
-      ],
+      ]),
       popular: true,
-      active: true,
-    },
-    {
-      name: 'Paket Enterprise',
-      slug: 'paket-enterprise',
-      description: 'E-commerce Ready untuk bisnis besar',
-      price: 6_500_000,
-      duration: '7-14 hari',
-      features: [
-        'E-commerce Ready',
-        '10+ Halaman Custom',
-        'Admin Dashboard',
-        'Payment Gateway Integration',
-        'Advanced SEO',
-        'Blog System',
-        '3x Revisi Desain',
-      ],
-      popular: false,
       active: true,
     },
   ];
@@ -72,6 +84,7 @@ async function seedServices() {
   }
 }
 
+// 🧩 3. Seed Portfolio
 async function seedPortfolios() {
   await Promise.all(
     portfolioSeedPayload.map((entry) => {
@@ -99,8 +112,10 @@ async function seedPortfolios() {
       });
     }),
   );
-  console.log('  ??? Portfolio items ensured');
+  console.log('  • Portfolios ensured');
 }
+
+// 🧩 4. Seed Testimonials
 async function seedTestimonials() {
   const testimonialData = [
     {
@@ -111,46 +126,6 @@ async function seedTestimonials() {
       text: 'Website dari CodingBoy sangat membantu bisnis saya. Pesanan online meningkat 300% dalam 2 bulan!',
       avatar: 'BS',
       featured: true,
-      active: true,
-    },
-    {
-      id: 'testimonial-sari-dewi',
-      name: 'Sari Dewi',
-      company: 'Boutique Fashion',
-      rating: 5,
-      text: 'Desainnya modern dan profesional. Customer jadi lebih percaya dengan brand saya.',
-      avatar: 'SD',
-      featured: true,
-      active: true,
-    },
-    {
-      id: 'testimonial-ahmad-rahman',
-      name: 'Ahmad Rahman',
-      company: 'Jasa Konsultan',
-      rating: 5,
-      text: 'Pelayanan cepat, hasil memuaskan. Highly recommended untuk UKM seperti saya!',
-      avatar: 'AR',
-      featured: true,
-      active: true,
-    },
-    {
-      id: 'testimonial-maya-putri',
-      name: 'Maya Putri',
-      company: 'Toko Online Fashion',
-      rating: 5,
-      text: 'Tim CodingBoy sangat profesional dan responsif. Website e-commerce kami jadi lebih user-friendly!',
-      avatar: 'MP',
-      featured: false,
-      active: true,
-    },
-    {
-      id: 'testimonial-andi-wijaya',
-      name: 'Andi Wijaya',
-      company: 'Klinik Kesehatan',
-      rating: 5,
-      text: 'Sistem booking online memudahkan pasien untuk membuat janji. Terima kasih CodingBoy!',
-      avatar: 'AW',
-      featured: false,
       active: true,
     },
   ];
@@ -167,6 +142,7 @@ async function seedTestimonials() {
   console.log('  • Testimonials ensured');
 }
 
+// 🧩 5. Seed Blogs
 async function seedBlogs() {
   await Promise.all(
     blogSeedPayload.map((entry) => {
@@ -199,10 +175,13 @@ async function seedBlogs() {
       });
     }),
   );
-  console.log('  ??? Blog posts ensured');
+  console.log('  • Blog posts ensured');
 }
+
+// MAIN EXECUTION
 async function main() {
   console.log('🌱 Seeding database...');
+  await seedAdmin();
   await seedServices();
   await seedPortfolios();
   await seedTestimonials();
@@ -218,24 +197,3 @@ main()
   .finally(async () => {
     await prisma.$disconnect();
   });
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
